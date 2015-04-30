@@ -249,10 +249,10 @@ class CritsStatusDocument(BaseDocument):
         Set the status of a top-level object.
 
         :param status: The status to set:
-                       ('New', 'In Progress', 'Analyzed', Deprecated')
+                       ('New', 'In Progress', 'Analyzed', 'Informational', 'Deprecated')
         """
 
-        if status in ('New', 'In Progress', 'Analyzed', 'Deprecated'):
+        if status in ('New', 'In Progress', 'Analyzed', 'Informational', 'Deprecated'):
             self.status = status
             if status == 'Deprecated' and 'actions' in self:
                 for action in self.actions:

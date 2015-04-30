@@ -225,6 +225,12 @@ def generate_domain_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Informational Domains'",
+            'text': "'Informational'",
+            'click': "function () {$('#domain_listing').jtable('load', {'refresh': 'yes', 'status': 'Informational'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated Domains'",
             'text': "'Deprecated'",
             'click': "function () {$('#domain_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",
