@@ -1,16 +1,15 @@
 <IfModule mod_ssl.c>
 <VirtualHost _default_:443>
-    ServerAdmin webmaster@localhost
+	ServerAdmin webmaster@localhost
 
-    LogLevel warn
-    CustomLog /var/log/apache2/ssl_access.log combined
+	LogLevel warn
+	CustomLog /var/log/apache2/ssl_access.log combined
 
-    SSLEngine on
-    SSLCertificateFile    /etc/ssl/certs/crits.crt
-    SSLCertificateKeyFile /etc/ssl/private/crits.plain.key
-    SSLProtocol All -SSLv2 -SSLv3
+	SSLEngine on
+    SSLCertificateFile      /etc/ssl/certs/crits.crt
+    SSLCertificateKeyFile /etc/ssl/private/crits.key
 
-    DocumentRoot "/data/crits/extras/www"
+	DocumentRoot "/data/crits/extras/www"
     Alias /static/ /data/crits/extras/www/static/
     Alias /js/ /data/crits/extras/www/js/
     Alias /css/ /data/crits/extras/www/css/
@@ -20,8 +19,8 @@
     Alias /new_images/ /data/crits/extras/www/new_images/
     Alias /plugin/ /data/crits/extras/www/plugin/
     Alias /favicon.ico /data/crits/extras/www/favicon.ico
-    WSGIScriptAlias / /data/crits/django.wsgi
-    WSGIApplicationGroup %{GLOBAL}
+	WSGIScriptAlias /crits /data/crits/django.wsgi
+	WSGIApplicationGroup %{GLOBAL}
 
 </VirtualHost>
 </IfModule>
