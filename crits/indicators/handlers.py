@@ -355,6 +355,7 @@ def handle_indicator_csv(csv_data, source, method, reference, ctype, username,
     data = csv.DictReader(StringIO(cdata), skipinitialspace=True)
     result = {'success': True}
     result_message = ""
+    result_ids = []
     # Compute permitted values in CSV
     valid_ratings = {
         'unknown': 'unknown',
@@ -423,6 +424,7 @@ def handle_indicator_csv(csv_data, source, method, reference, ctype, username,
             result_message += "Failure processing row %s: %s<br />" % (processed, str(e))
             continue
         if response['success']:
+            result_ids.append( { 'id' : response['objectid'], 'value' : ind['value'] } )
             if actions:
                 action = {'active': 'on',
                           'analyst': username,
@@ -443,6 +445,7 @@ def handle_indicator_csv(csv_data, source, method, reference, ctype, username,
         result['success'] = False
         result_message = "Could not find any valid CSV rows to parse!"
     result['message'] = "Successfully added %s Indicator(s).<br />%s" % (added, result_message)
+    result['objectids'] = result_ids
     return result
 
 def handle_indicator_ind(value, source, reference, ctype, analyst,

@@ -224,13 +224,8 @@ class IndicatorCSVResource(CRITsAPIResource):
                    'type': 'Indicator'}
         if result.get('message'):
             content['message'] = result.get('message')
-        if result.get('objectid'):
-            url = reverse('api_dispatch_detail',
-                          kwargs={'resource_name': 'indicator_csv',
-                                  'api_name': 'v1',
-                                  'pk': result.get('objectid')})
-            content['id'] = result.get('objectid')
-            content['url'] = url
+        if result.get('objectids'):
+            content['objectids'] = result.get('objectids')
         if not result['success']:
             content['return_code'] = 1
         self.crits_response(content)
