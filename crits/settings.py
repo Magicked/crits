@@ -64,7 +64,7 @@ else:
     SERVICE_MODEL = 'process'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    LOGIN_URL = "/login/"
+    LOGIN_URL = "/crits/login/"
 
 DATABASES = {
     'default': {

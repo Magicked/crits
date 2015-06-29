@@ -326,7 +326,7 @@ def get_verified_field(data, valid_values, field=None, default=None):
         return value_list[0]
 
 def handle_indicator_csv(csv_data, source, method, reference, ctype, username,
-                         add_domain=False):
+                         add_domain=False, add_relationship=False):
     """
     Handle adding Indicators in CSV format (file or blob).
 
@@ -418,7 +418,7 @@ def handle_indicator_csv(csv_data, source, method, reference, ctype, username,
         ind[form_consts.Common.TICKET_VARIABLE_NAME] = d.get(form_consts.Common.TICKET, '')
         try:
             response = handle_indicator_insert(ind, source, reference, analyst=username,
-                                               method=method, add_domain=add_domain)
+                                               method=method, add_domain=add_domain, add_relationship=add_relationship)
         except Exception, e:
             result['success'] = False
             result_message += "Failure processing row %s: %s<br />" % (processed, str(e))

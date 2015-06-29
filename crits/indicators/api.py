@@ -215,10 +215,11 @@ class IndicatorCSVResource(CRITsAPIResource):
         reference = bundle.data.get('reference', None)
         method = bundle.data.get('method', None)
         add_domain = bundle.data.get('add_domain', False)
+        add_relationship = bundle.data.get('add_relationship', False)
         # Type must be blob otherwise we need to send it a file handle
         ctype = "blob"
 
-        result = handle_indicator_csv(csv_data, source, method, reference, ctype, analyst, add_domain=False)
+        result = handle_indicator_csv(csv_data, source, method, reference, ctype, analyst, add_domain, add_relationship)
 
         content = {'return_code': 0,
                    'type': 'Indicator'}
