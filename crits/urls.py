@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     (r'^services/', include('crits.services.urls')),           # Services
     (r'^standards/', include('crits.standards.urls')),         # Standards
     (r'^targets/', include('crits.targets.urls')),             # Targets
+    (r'^vis/', include('crits.vis.urls')),                     # Vis.js
 )
 
 # Error overrides

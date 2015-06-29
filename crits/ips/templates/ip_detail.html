@@ -12,6 +12,12 @@
     </ul>
 
 <div id="details_section">
+    <span class="horizontal_menu">
+    <ul class="hmenu">
+        <li><a href='{% url 'crits.vis.views.vis_graph' ip.id %}'>Vis.js</a></li>
+    </ul>
+    </span>
+
     <div class="content_box content_details">
         <h3 class="titleheader">
             <span>Details for {{ip.ip}}</span><!-- TODO: add in-place IP editing here -->
