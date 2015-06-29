@@ -335,6 +335,7 @@ TEMPLATE_DIRS = (
     os.path.join(SITE_ROOT, 'standards/templates'),
     os.path.join(SITE_ROOT, 'stats/templates'),
     os.path.join(SITE_ROOT, 'targets/templates'),
+    os.path.join(SITE_ROOT, 'vis/templates'),
 )
 
 STATICFILES_DIRS = (
@@ -358,6 +359,7 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'services/static'),
     os.path.join(SITE_ROOT, 'config/static'),
     os.path.join(SITE_ROOT, 'targets/static'),
+    os.path.join(SITE_ROOT, 'vis/static'),
 )
 
 INSTALLED_APPS = (
@@ -387,6 +389,7 @@ INSTALLED_APPS = (
     'crits.services',
     'crits.stats',
     'crits.targets',
+    'crits.vis',
     'tastypie',
     'tastypie_mongoengine',
 )
