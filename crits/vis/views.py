@@ -22,4 +22,5 @@ def vis_graph(request, object_id):
     :returns: :class:`django.http.HttpResponse`
     """
 
-    return generate_vis_graph(request, object_id)
+    (template, args) = generate_vis_graph(request.user.username, object_id)
+    return render_to_response(template, args, RequestContext(request))

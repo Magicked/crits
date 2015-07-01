@@ -26,7 +26,7 @@ from crits.relationships.handlers import get_relationships
 logger = logging.getLogger(__name__)
 
 
-def generate_vis_graph(request, start_id):
+def generate_vis_graph(analyst, start_id):
     """
     Generate data for the nodes and relationships for the vis.js graph.
 
@@ -36,20 +36,17 @@ def generate_vis_graph(request, start_id):
     :type str
     :returns: :class:`django.http.HttpResponse`
     """
-    analyst = request.user.username
-    #analyst = 'nhausrath'
     sources = user_sources(analyst)
     obj = find_document(start_id, sources)
     if not obj:
-        template = "error.html"
         args = {'error': "ID does not exist or insufficient privs for source"}
-        return render_to_response("error.html", args, RequestContext(request))
+        return ("error.html", args)
 
     vismap = { 'nodes' : [], 'edges' : [] }
     id_list = []
     vismap = build_relationships(obj, vismap, sources, 1, 25, id_list)
 
-    return render_to_response("vis.html", vismap, RequestContext(request))
+    return ("vis.html", vismap)
 
 
 def build_relationships(obj, vismap, sources, cur_depth, max_depth, id_list):
@@ -62,7 +59,6 @@ def build_relationships(obj, vismap, sources, cur_depth, max_depth, id_list):
     :type vismap: dict
     """
     id_list.append(str(obj.id))
-    logger.error("Class name is: {0}".format(obj.__class__.__name__))
 
     if obj.__class__.__name__ == "Indicator":
         label = obj.value
@@ -189,13 +185,9 @@ def find_document(object_id, sources):
 
 
 def contains_edge(id1, id2, vismap):
-    logging.error("Comparing ids: {0} - {1}".format(id1, id2))
     for edge in vismap['edges']:
         if edge['from_id'] == id1 and edge['to_id'] == id2:
-            logging.error("Returning True")
             return True
         if edge['from_id'] == id2 and edge['to_id'] == id1:
-            logging.error("Returning True")
             return True
-    logging.error("Returning False")
     return False

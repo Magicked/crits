@@ -57,6 +57,7 @@ if settings.ENABLE_API:
     from crits.services.api import ServiceResource
     from crits.targets.api import TargetResource
     from crits.standards.api import StandardsResource
+    from crits.vis.api import VisResource
 
     v1_api = Api(api_name='v1')
     v1_api.register(ActorResource())
@@ -80,6 +81,7 @@ if settings.ENABLE_API:
     v1_api.register(ServiceResource())
     v1_api.register(TargetResource())
     v1_api.register(StandardsResource())
+    v1_api.register(VisResource())
 
     for service_directory in settings.SERVICE_DIRS:
         if os.path.isdir(service_directory):
