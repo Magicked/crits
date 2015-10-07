@@ -44,7 +44,7 @@ def generate_vis_graph(analyst, start_id):
 
     vismap = { 'nodes' : [], 'edges' : [] }
     id_list = []
-    vismap = build_relationships(obj, vismap, sources, 1, 25, id_list)
+    vismap = build_relationships(obj, vismap, sources, 1, 30, id_list)
 
     return ("vis.html", vismap)
 
@@ -117,6 +117,7 @@ def build_relationships(obj, vismap, sources, cur_depth, max_depth, id_list):
     else:
         return vismap
 
+    label = label.replace('\\', '\\\\')
     vismap['nodes'].append( { 'id' : '{0}'.format(obj.id), 'label' : label,
         'shape' : shape, 'size' : size, 'color' : color, 'color_border' :
         color_border, 'color_highlight_border' : color_highlight_border,
