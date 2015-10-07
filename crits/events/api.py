@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
 from tastypie import authorization
 from tastypie.authentication import MultiAuthentication
-from tastypie.exceptions import BadRequest
 
 from crits.events.event import Event, EventType
 from crits.events.handlers import add_new_event
@@ -18,7 +17,7 @@ class EventResource(CRITsAPIResource):
 
     class Meta:
         object_class = Event
-        allowed_methods = ('get', 'post')
+        allowed_methods = ('get', 'post', 'patch')
         resource_name = "events"
         authentication = MultiAuthentication(CRITsApiKeyAuthentication(),
                                              CRITsSessionAuthentication())
@@ -56,6 +55,8 @@ class EventResource(CRITsAPIResource):
         date = bundle.data.get('date', None)
         bucket_list = bundle.data.get('bucket_list', None)
         ticket = bundle.data.get('ticket', None)
+        campaign = bundle.data.get('campaign', None)
+        campaign_confidence = bundle.data.get('campaign_confidence', None)
 
         content = {'return_code': 0,
                    'type': 'Event'}
@@ -76,7 +77,9 @@ class EventResource(CRITsAPIResource):
                                date,
                                analyst,
                                bucket_list,
-                               ticket)
+                               ticket,
+                               campaign,
+                               campaign_confidence)
 
         if result.get('message'):
             content['message'] = result.get('message')
@@ -87,6 +90,7 @@ class EventResource(CRITsAPIResource):
                                   'api_name': 'v1',
                                   'pk': result.get('id')})
             content['url'] = url
+
         if result['success']:
             content['return_code'] = 0
         self.crits_response(content)

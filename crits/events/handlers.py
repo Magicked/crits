@@ -1,6 +1,6 @@
+import datetime
 import json
 import uuid
-from HTMLParser import HTMLParser
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -9,6 +9,7 @@ from django.template import RequestContext
 from mongoengine.base import ValidationError
 
 from crits.core import form_consts
+from crits.campaigns.campaign import Campaign
 from crits.campaigns.forms import CampaignForm
 from crits.core.crits_mongoengine import create_embedded_source, json_handler
 from crits.core.crits_mongoengine import EmbeddedCampaign
@@ -246,7 +247,8 @@ def generate_event_id(event):
     return uuid.uuid4()
 
 def add_new_event(title, description, event_type, source, method, reference,
-                  date, analyst, bucket_list=None, ticket=None):
+                  date, analyst, bucket_list=None, ticket=None,
+                  campaign=None, campaign_confidence=None):
     """
     Add a new Event to CRITs.
 
@@ -271,10 +273,16 @@ def add_new_event(title, description, event_type, source, method, reference,
     :param ticket: Ticket to associate with this event.
     :type ticket: str
     :returns: dict with keys "success" (boolean) and "message" (str)
+    :param campaign: Campaign to attribute to this event.
+    :type campaign: str
+    :param campaign_confidence: Confidence of this campaign.
+    :type campaign_confidence: str
     """
 
     if not source:
         return {'success': False, 'message': "Missing source information."}
+
+    result = dict()
 
     event = Event()
     event.title = title
@@ -288,30 +296,51 @@ def add_new_event(title, description, event_type, source, method, reference,
                                date=date)
     event.add_source(s)
 
+    valid_campaign_confidence = {
+        'low': 'low',
+        'medium': 'medium',
+        'high': 'high'}
+    valid_campaigns = {}
+    for c in Campaign.objects(active='on'):
+        valid_campaigns[c['name'].lower()] = c['name']
+
+    if campaign:
+        if isinstance(campaign, basestring) and len(campaign) > 0:
+            if campaign.lower() not in valid_campaigns:
+                result = {'success':False, 'message':'{} is not a valid campaign.'.format(campaign)}
+            else:
+                confidence = valid_campaign_confidence.get(campaign_confidence, 'low')
+                campaign = EmbeddedCampaign(name=campaign,
+                                                   confidence=confidence,
+                                                   description="",
+                                                   analyst=analyst,
+                                                   date=datetime.datetime.now())
+                event.add_campaign(campaign)
+
     if bucket_list:
         event.add_bucket_list(bucket_list, analyst)
 
     if ticket:
         event.add_ticket(ticket, analyst)
 
-    try:
-        event.save(username=analyst)
+    if not result:
+        try:
+            event.save(username=analyst)
 
-        # run event triage
-        event.reload()
-        run_triage(event, analyst)
+            # run event triage
+            event.reload()
+            run_triage(event, analyst)
 
-        message = ('<div>Success! Click here to view the new event: <a href='
-                   '"%s">%s</a></div>' % (reverse('crits.events.views.view_event',
-                                                  args=[event.id]),
-                                          title))
-        result = {'success': True,
-                  'message': message,
-                  'id': str(event.id),
-                  'object': event}
-    except ValidationError, e:
-        result = {'success': False,
-                  'message': e}
+            message = ('<div>Success! Click here to view the new event: <a href='
+                       '"%s">%s</a></div>' % (reverse('crits.events.views.view_event',
+                                                      args=[event.id]),
+                                              title))
+            result = {'success': True,
+                      'message': message,
+                      'id': str(event.id)}
+        except ValidationError, e:
+            result = {'success': False,
+                      'message': e}
     return result
 
 def event_remove(_id, username):
@@ -332,35 +361,6 @@ def event_remove(_id, username):
         return {'success':True}
     else:
         return {'success':False,'message': 'Need to be admin'}
-
-def update_event_description(event_id, description, analyst):
-    """
-    Update event description.
-
-    :param event_id: The ObjectId of the Event to update.
-    :type event_id: str
-    :param description: The new description.
-    :type description: str
-    :param analyst: The user updating this Event.
-    :type analyst: str
-    :returns: dict with keys "success" (boolean) and "message" (str)
-    """
-
-    if not description:
-        return {'success': False, 'message': "No description to change"}
-    event = Event.objects(id=event_id).first()
-    if not event:
-        return {'success': False, 'message': "No event found"}
-    # Have to unescape the submitted data. Use unescape() to escape
-    # &lt; and friends. Use urllib2.unquote() to escape %3C and friends.
-    h = HTMLParser()
-    description = h.unescape(description)
-    event.description = description
-    try:
-        event.save(username=analyst)
-        return {'success': True}
-    except ValidationError, e:
-        return {'success': False, 'message': e}
 
 def update_event_title(event_id, title, analyst):
     """
