@@ -55,6 +55,8 @@ class EventResource(CRITsAPIResource):
         date = bundle.data.get('date', None)
         bucket_list = bundle.data.get('bucket_list', None)
         ticket = bundle.data.get('ticket', None)
+        campaign = bundle.data.get('campaign', None)
+        campaign_confidence = bundle.data.get('campaign_confidence', None)
 
         content = {'return_code': 0,
                    'type': 'Event'}
@@ -75,7 +77,9 @@ class EventResource(CRITsAPIResource):
                                date,
                                analyst,
                                bucket_list,
-                               ticket)
+                               ticket,
+                               campaign,
+                               campaign_confidence)
 
         if result.get('message'):
             content['message'] = result.get('message')
@@ -86,6 +90,7 @@ class EventResource(CRITsAPIResource):
                                   'api_name': 'v1',
                                   'pk': result.get('id')})
             content['url'] = url
+
         if result['success']:
             content['return_code'] = 0
         self.crits_response(content)
