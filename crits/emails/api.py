@@ -96,7 +96,8 @@ class EmailResource(CRITsAPIResource):
                                 confidence)
         if type_ == 'raw':
             raw_email = bundle.data.get('filedata', None)
-            result = handle_pasted_eml(raw_email,
+            raw_email_data = raw_email.read()
+            result = handle_pasted_eml(raw_email_data,
                                        source,
                                        reference,
                                        analyst,

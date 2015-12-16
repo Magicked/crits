@@ -1067,18 +1067,18 @@ def handle_eml(data, sourcename, reference, analyst, method, parent_type=None,
                                                     rel_type,
                                                     analyst=analyst,
                                                     get_rels=False)
-        if not ret['success']:
-            result['reason'] = "Failed to create relationship.\n<br /><pre>"
-            + result['message'] + "</pre>"
-            return result
+            if not ret['success']:
+                result['reason'] = "Failed to create relationship.\n<br /><pre>"
+                + result['message'] + "</pre>"
+                return result
 
-        # Save the email again since it now has a new relationship.
-        try:
-            result['object'].save(username=analyst)
-        except Exception, e:
-            result['reason'] = "Failed to save email.\n<br /><pre>"
-            + str(e) + "</pre>"
-            return result
+            # Save the email again since it now has a new relationship.
+            try:
+                result['object'].save(username=analyst)
+            except Exception, e:
+                result['reason'] = "Failed to save email.\n<br /><pre>"
+                + str(e) + "</pre>"
+                return result
 
     for (md5_, attachment) in result['attachments'].items():
         if handle_file(attachment['filename'],
