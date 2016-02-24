@@ -82,11 +82,6 @@ if settings.ENABLE_API:
     v1_api.register(ServiceResource())
     v1_api.register(SignatureResource())
     v1_api.register(TargetResource())
-<<<<<<< HEAD
-    v1_api.register(StandardsResource())
-    v1_api.register(VisResource())
-=======
->>>>>>> stable_4_upstream
 
     for service_directory in settings.SERVICE_DIRS:
         if os.path.isdir(service_directory):
