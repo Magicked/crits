@@ -33,7 +33,8 @@ class Sector(CritsDocument, CritsSchemaDocument, Document):
             'Indicator': 'Integer',
             'PCAP': 'Integer',
             'RawData': 'Integer',
-            'Sample': 'Integer'
+            'Sample': 'Integer',
+            'Signature': 'Integer'
         },
     }
 
@@ -51,6 +52,7 @@ class Sector(CritsDocument, CritsSchemaDocument, Document):
     PCAP = IntField(default=0)
     RawData = IntField(default=0)
     Sample = IntField(default=0)
+    Signature = IntField(default=0)
     Target = IntField(default=0)
 
     def migrate(self):
@@ -59,22 +61,3 @@ class Sector(CritsDocument, CritsSchemaDocument, Document):
         """
 
         pass
-
-
-class SectorObject(CritsDocument, CritsSchemaDocument, Document):
-    """
-    Sector object class.
-    """
-
-    meta = {
-        "crits_type": "SectorObject",
-        "collection": settings.COL_SECTORS,
-        "latest_schema_version": 1,
-        "schema_doc": {
-            'name': 'The name of the sector',
-            'active': 'Enabled in the UI (on/off)',
-        }
-    }
-
-    name = StringField()
-    active = StringField(default="on")

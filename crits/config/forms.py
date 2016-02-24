@@ -40,10 +40,6 @@ class ConfigGeneralForm(forms.Form):
                    'performance but will consume more memory to do so!'),
         initial=False,
         required=False)
-    rar_path = forms.CharField(
-        widget=forms.TextInput,
-        help_text='*Requires a web server restart.',
-        required=True)
     rt_url = forms.CharField(
         widget=forms.TextInput,
         label='Ticketing URL',
@@ -71,6 +67,10 @@ class ConfigGeneralForm(forms.Form):
         widget=forms.TextInput,
         help_text='*Requires a web server restart.',
         required=True)
+    zip7_password = forms.CharField(
+        widget=forms.TextInput,
+        label='ZIP Password for downloaded artifacts',
+        required=False)
     enable_toasts = forms.BooleanField(initial=False,
         label="Enable Toast Notifications",
         help_text='*Requires a web server restart.',

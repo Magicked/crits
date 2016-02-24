@@ -29,7 +29,6 @@ class Command(BaseCommand):
         imports = [ 'anyjson',
                    'bson',
                    'crits',
-                   'cybox',
                    'dateutil',
                    'gridfs',
                    'importlib',
@@ -42,7 +41,6 @@ class Command(BaseCommand):
                    'pydeep',
                    'pyparsing',
                    'requests',
-                   'stix',
                    'yaml',
                    ]
 
@@ -61,10 +59,9 @@ class Command(BaseCommand):
             sys.exit(1)
 
         # Check for binaries
-        binaries = ['7za',
+        binaries = ['7z',
                     'mongod',
                     'mongos',
-                    'unrar',
                     'upx']
 
         cmd = "where" if platform.system() == "Windows" else "which"
@@ -117,9 +114,6 @@ class Command(BaseCommand):
         td = config.temp_dir
         if not os.path.exists(td):
             print CE('Configured CRITs temp directory does not exist: %s' % td)
-        rp = config.rar_path
-        if not os.path.exists(rp):
-            print CE('Configured CRITs rar path does not exist: %s' % rp)
         zp = config.zip7_path
         if not os.path.exists(zp):
             print CE('Configured CRITs zip path does not exist: %s' % zp)

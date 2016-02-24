@@ -5,56 +5,14 @@ from django.forms.widgets import RadioSelect
 from crits.campaigns.campaign import Campaign
 from crits.core import form_consts
 from crits.core.forms import add_bucketlist_to_form, add_ticket_to_form
-from crits.core.widgets import CalWidget, ExtendedChoiceField
-from crits.core.handlers import get_source_names, get_item_names, get_object_types
+from crits.core.widgets import CalWidget
+from crits.core.handlers import get_source_names, get_item_names
 from crits.core.user_tools import get_user_organization
-from crits.indicators.indicator import IndicatorAction
-
-class IndicatorActionsForm(forms.Form):
-    """
-    Django form for adding actions.
-    """
-
-    error_css_class = 'error'
-    required_css_class = 'required'
-    action_type = forms.ChoiceField(widget=forms.Select, required=True)
-    begin_date = forms.DateTimeField(
-        widget=CalWidget(format='%Y-%m-%d %H:%M:%S',
-                         attrs={'class': 'datetimeclass',
-                                'size': '25',
-                                'id': 'id_action_begin_date'}),
-        input_formats=settings.PY_FORM_DATETIME_FORMATS,
-        required=False)
-    end_date = forms.DateTimeField(
-        widget=CalWidget(format='%Y-%m-%d %H:%M:%S',
-                         attrs={'class': 'datetimeclass',
-                                'size': '25',
-                                'id': 'id_action_end_date'}),
-        input_formats=settings.PY_FORM_DATETIME_FORMATS,
-        required=False)
-    performed_date = forms.DateTimeField(
-        widget=CalWidget(format='%Y-%m-%d %H:%M:%S',
-                         attrs={'class': 'datetimeclass',
-                                'size': '25',
-                                'id': 'id_action_performed_date'}),
-        input_formats=settings.PY_FORM_DATETIME_FORMATS,
-        required=False)
-    active = forms.ChoiceField(
-        widget=RadioSelect,
-        choices=(('on', 'on'),
-                 ('off', 'off')))
-    reason = forms.CharField(
-        widget=forms.TextInput(attrs={'size': '50'}),
-        required=False)
-    date = forms.CharField(
-        widget=forms.HiddenInput(attrs={'size': '50',
-                                        'readonly': 'readonly',
-                                        'id': 'id_action_date'}))
-
-    def __init__(self, *args, **kwargs):
-        super(IndicatorActionsForm, self).__init__(*args, **kwargs)
-        self.fields['action_type'].choices = [
-            (c.name, c.name) for c in get_item_names(IndicatorAction, True)]
+from crits.vocabulary.indicators import (
+    IndicatorTypes,
+    IndicatorThreatTypes,
+    IndicatorAttackTypes
+)
 
 class IndicatorActivityForm(forms.Form):
     """
@@ -139,7 +97,7 @@ class UploadIndicatorTextForm(forms.Form):
         self.fields['source'].choices = [
             (c.name, c.name) for c in get_source_names(True, True, username)]
         self.fields['source'].initial = get_user_organization(username)
-        dt = "Indicator, Type, Campaign, Campaign Confidence, Confidence, Impact, Bucket List, Ticket, Action\n"
+        dt = "Indicator, Type, Threat Type, Attack Type, Campaign, Campaign Confidence, Confidence, Impact, Bucket List, Ticket, Action, Status\n"
         self.fields['data'].initial = dt
 
 class UploadIndicatorForm(forms.Form):
@@ -149,9 +107,11 @@ class UploadIndicatorForm(forms.Form):
 
     error_css_class = 'error'
     required_css_class = 'required'
-    indicator_type = ExtendedChoiceField(required=True)
+    indicator_type = forms.ChoiceField(widget=forms.Select, required=True)
+    threat_type = forms.ChoiceField(widget=forms.Select, required=True)
+    attack_type = forms.ChoiceField(widget=forms.Select, required=True)
     value = forms.CharField(
-        widget=forms.TextInput(attrs={'size': '100'}),
+        widget=forms.Textarea(attrs={'rows': '5', 'cols': '28'}),
         required=True)
     confidence = forms.ChoiceField(widget=forms.Select, required=True)
     impact = forms.ChoiceField(widget=forms.Select, required=True)
@@ -170,20 +130,22 @@ class UploadIndicatorForm(forms.Form):
         label=form_consts.Indicator.SOURCE_REFERENCE,
         required=False)
 
-    def __init__(self, username, choices=None, *args, **kwargs):
+    def __init__(self, username, *args, **kwargs):
         super(UploadIndicatorForm, self).__init__(*args, **kwargs)
         self.fields['source'].choices = [
             (c.name, c.name) for c in get_source_names(True, True, username)]
         self.fields['source'].initial = get_user_organization(username)
-        if not choices:
-            #only valid types for indicators are those which don't require file upload
-            choices = [
-                (c[0], c[0], {'datatype': c[1].keys()[0],
-                              'datatype_value': c[1].values()[0]})
-                for c in get_object_types(active=True, query={'datatype.file': {'$exists': 0},
-                                                              'datatype.enum': {'$exists': 0}})]
-
-        self.fields['indicator_type'].choices = choices
+        self.fields['indicator_type'].choices = [
+            (c,c) for c in IndicatorTypes.values(sort=True)
+        ]
+        self.fields['threat_type'].choices = [
+            (c,c) for c in IndicatorThreatTypes.values(sort=True)
+        ]
+        self.fields['threat_type'].initial = IndicatorThreatTypes.UNKNOWN
+        self.fields['attack_type'].choices = [
+            (c,c) for c in IndicatorAttackTypes.values(sort=True)
+        ]
+        self.fields['attack_type'].initial = IndicatorAttackTypes.UNKNOWN
         self.fields['indicator_type'].widget.attrs = {'class': 'object-types'}
         self.fields['campaign'].choices = [("", "")]
         self.fields['campaign'].choices += [
@@ -208,12 +170,3 @@ class UploadIndicatorForm(forms.Form):
 
         add_bucketlist_to_form(self)
         add_ticket_to_form(self)
-
-class NewIndicatorActionForm(forms.Form):
-    """
-    Django form for adding a new Indicator Action.
-    """
-
-    error_css_class = 'error'
-    required_css_class = 'required'
-    action = forms.CharField(widget=forms.TextInput, required=True)

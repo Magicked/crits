@@ -12,9 +12,6 @@ Provides: The language CRITs is written in. 2.7.x is a minimum requirement!
 mongodb 2.6.4
 Provides: MongoDB which is the backend database CRITs uses.
 
-unrar
-Provides: unrar
-
 zip
 Provides: zip
 
@@ -69,14 +66,6 @@ Note: Requires libxml and libxslt development headers to be installed on your sy
 python-dateutil
 Requires: six
 Provides: dateutil
-
-cybox==2.1.0.5
-Requires: lxml>=2.3, python-dateutil
-Provides: cybox
-
-stix==1.1.1.0
-Requires: cybox>=2.1.0.4,<2.1.1.0, lxml>=2.3, python-dateutil
-Provides: stix
 
 mongoengine==0.8.7
 Requires: pymongo>=2.5

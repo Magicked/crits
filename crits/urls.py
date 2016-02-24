@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     (r'^samples/', include('crits.samples.urls')),             # Samples
     (r'^screenshots/', include('crits.screenshots.urls')),     # Screenshots
     (r'^services/', include('crits.services.urls')),           # Services
-    (r'^standards/', include('crits.standards.urls')),         # Standards
+    (r'^signatures/', include('crits.signatures.urls')),       # Signatures
     (r'^targets/', include('crits.targets.urls')),             # Targets
     (r'^vis/', include('crits.vis.urls')),                     # Vis.js
 )
@@ -53,16 +53,13 @@ if settings.ENABLE_API:
     from crits.indicators.api import IndicatorResource, IndicatorActivityResource, IndicatorCSVResource
     from crits.exploits.api import ExploitResource
     from crits.ips.api import IPResource
-    from crits.objects.api import ObjectResource
     from crits.pcaps.api import PCAPResource
     from crits.raw_data.api import RawDataResource
-    from crits.relationships.api import RelationshipResource
     from crits.samples.api import SampleResource
     from crits.screenshots.api import ScreenshotResource
     from crits.services.api import ServiceResource
+    from crits.signatures.api import SignatureResource
     from crits.targets.api import TargetResource
-    from crits.standards.api import StandardsResource
-    from crits.vis.api import VisResource
 
     v1_api = Api(api_name='v1')
     v1_api.register(ActorResource())
@@ -79,16 +76,18 @@ if settings.ENABLE_API:
     v1_api.register(IndicatorCSVResource())
     v1_api.register(IndicatorActivityResource())
     v1_api.register(IPResource())
-    v1_api.register(ObjectResource())
     v1_api.register(PCAPResource())
     v1_api.register(RawDataResource())
-    v1_api.register(RelationshipResource())
     v1_api.register(SampleResource())
     v1_api.register(ScreenshotResource())
     v1_api.register(ServiceResource())
+    v1_api.register(SignatureResource())
     v1_api.register(TargetResource())
+<<<<<<< HEAD
     v1_api.register(StandardsResource())
     v1_api.register(VisResource())
+=======
+>>>>>>> stable_4_upstream
 
     for service_directory in settings.SERVICE_DIRS:
         if os.path.isdir(service_directory):

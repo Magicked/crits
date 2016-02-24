@@ -13,15 +13,14 @@ from crits.core.data_tools import json_handler, make_ascii_strings
 from crits.core.data_tools import make_unicode_strings, make_hex, xor_search
 from crits.core.data_tools import xor_string, make_stackstrings
 from crits.core.exceptions import ZipFileError
-from crits.core.handlers import get_object_types
 from crits.core.handsontable_tools import form_to_dict
 from crits.core.user_tools import user_can_view_data, user_is_admin
 from crits.core.user_tools import get_user_organization
 from crits.objects.forms import AddObjectForm
 from crits.samples.forms import UploadFileForm, XORSearchForm
-from crits.samples.forms import UnrarSampleForm
+from crits.samples.forms import UnzipSampleForm
 from crits.samples.handlers import handle_uploaded_file, mail_sample
-from crits.samples.handlers import handle_unrar_sample, generate_yarahit_jtable
+from crits.samples.handlers import generate_yarahit_jtable
 from crits.samples.handlers import delete_sample, handle_unzip_file
 from crits.samples.handlers import get_source_counts
 from crits.samples.handlers import get_sample_details
@@ -131,14 +130,9 @@ def bulk_add_md5_sample(request):
             such as items that failed or successfully added. This may
             also contain helpful status messages about each operation.
     """
-    all_obj_type_choices = [(c[0],
-                            c[0],
-                            {'datatype':c[1].keys()[0],
-                            'datatype_value':c[1].values()[0]}
-                            ) for c in get_object_types(False)]
 
     formdict = form_to_dict(UploadFileForm(request.user, request.POST, request.FILES))
-    objectformdict = form_to_dict(AddObjectForm(request.user, all_obj_type_choices))
+    objectformdict = form_to_dict(AddObjectForm(request.user))
 
     if request.method == "POST" and request.is_ajax():
         response = process_bulk_add_md5_sample(request, formdict);
@@ -217,14 +211,14 @@ def upload_file(request, related_md5=None):
                     result = handle_uploaded_file(
                         request.FILES['filedata'],
                         source,
-                        method,
-                        reference,
-                        form.cleaned_data['file_format'],
-                        form.cleaned_data['password'],
-                        analyst,
-                        campaign,
-                        confidence,
-                        related_md5,
+                        method=method,
+                        reference=reference,
+                        file_format=form.cleaned_data['file_format'],
+                        password=form.cleaned_data['password'],
+                        user=analyst,
+                        campaign=campaign,
+                        confidence=confidence,
+                        related_md5=related_md5,
                         bucket_list=form.cleaned_data[form_consts.Common.BUCKET_LIST_VARIABLE_NAME],
                         ticket=form.cleaned_data[form_consts.Common.TICKET_VARIABLE_NAME],
                         inherited_source=inherited_source,
@@ -234,16 +228,18 @@ def upload_file(request, related_md5=None):
                     result = handle_uploaded_file(
                         None,
                         source,
-                        method,
-                        reference,
-                        form.cleaned_data['file_format'],
-                        None,
-                        analyst,
-                        campaign,
-                        confidence,
+                        method=method,
+                        reference=reference,
+                        file_format=form.cleaned_data['file_format'],
+                        password=None,
+                        user=analyst,
+                        campaign=campaign,
+                        confidence=confidence,
                         related_md5 = related_md5,
                         filename=request.POST['filename'].strip(),
                         md5=request.POST['md5'].strip().lower(),
+                        sha1=request.POST['sha1'].strip().lower(),
+                        sha256=request.POST['sha256'].strip().lower(),
                         bucket_list=form.cleaned_data[form_consts.Common.BUCKET_LIST_VARIABLE_NAME],
                         ticket=form.cleaned_data[form_consts.Common.TICKET_VARIABLE_NAME],
                         inherited_source=inherited_source,
@@ -460,9 +456,7 @@ def unzip_sample(request, md5):
     """
 
     if request.method == "POST":
-        # Intentionally using UnrarSampleForm here. Both unrar and unzip use
-        # the same form because it's an identical form.
-        form = UnrarSampleForm(request.POST)
+        form = UnzipSampleForm(request.POST)
         if form.is_valid():
             pwd = form.cleaned_data['password']
             try:
@@ -478,30 +472,6 @@ def unzip_sample(request, md5):
                                   {'error': 'Expecting POST.'},
                                   RequestContext(request))
 
-@user_passes_test(user_can_view_data)
-def unrar_sample(request, md5):
-    """
-    Unrar a sample.
-
-    :param request: Django request object (Required)
-    :type request: :class:`django.http.HttpRequest`
-    :param md5: The MD5 of the sample to use.
-    :type md5: str
-    :returns: :class:`django.http.HttpResponse`
-    """
-
-    if request.method == "POST":
-        unrar_form = UnrarSampleForm(request.POST)
-        if unrar_form.is_valid():
-            pwd = unrar_form.cleaned_data['password']
-            try:
-                handle_unrar_sample(md5, user=request.user.username, password=pwd)
-            except ZipFileError, zfe:
-                return render_to_response('error.html',
-                                          {'error' : zfe.value},
-                                          RequestContext(request))
-        return HttpResponseRedirect(reverse('crits.samples.views.detail',
-                                            args=[md5]))
 
 #TODO: convert to jtable
 @user_passes_test(user_can_view_data)

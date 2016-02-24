@@ -5,19 +5,16 @@ from django.core.management.base import BaseCommand
 from optparse import make_option
 
 from create_indexes import create_indexes
-from create_event_types import add_event_types
 from create_locations import add_location_objects
-from create_object_types import add_object_types
-from create_relationship_types import add_relationship_types
-from create_sectors import add_sector_objects
 from setconfig import create_config_if_not_exist
-from create_actors_content import add_actor_content
 from create_default_dashboard import create_dashboard
 
+from crits.core.crits_mongoengine import Action
 from crits.core.user_role import UserRole
 from crits.domains.domain import TLD
-from crits.indicators.indicator import IndicatorAction
 from crits.raw_data.raw_data import RawDataType
+from crits.signatures.signature import SignatureType
+
 
 class Command(BaseCommand):
     """
@@ -45,25 +42,14 @@ class Command(BaseCommand):
         else:
             print "Drop protection enabled. Will not drop existing content!"
         populate_user_roles(drop)
-        populate_indicator_actions(drop)
+        populate_actions(drop)
         populate_raw_data_types(drop)
+        populate_signature_types(drop)
         # The following will always occur with every run of this script:
         #   - tlds are based off of a Mozilla TLD list so it should never
         #     contain  entries outside of the ones provided.
-        #   - object types are based off of the CybOX standard (with very few
-        #   exceptions) so we will always repopulate with the list above.
-        #   - relationship types are based off of the CybOX standard so we will
-        #   always populate with the list above.
-        # If you wish to add your own custom relationship types or object types
-        # (not recommended), then be sure to add them above so they will be
-        # added back if this script were to be used again.
         populate_tlds(drop)
-        add_relationship_types(drop)
-        add_object_types(drop)
-        add_event_types(drop)
         add_location_objects(drop)
-        add_sector_objects(drop)
-        add_actor_content(drop)
         create_dashboard(drop)
         create_config_if_not_exist()
         create_indexes()
@@ -92,26 +78,27 @@ def populate_user_roles(drop):
     else:
         print "User Roles: existing documents detected. skipping!"
 
-def populate_indicator_actions(drop):
+def populate_actions(drop):
     """
-    Populate default set of Indicator Actions into the system.
+    Populate default set of Actions into the system.
 
     :param drop: Drop the existing collection before trying to populate.
     :type: boolean
     """
 
-    # define your indicator actions here
+    # define your Actions here
     actions = ['Blocked Outbound At Firewall', 'Blocked Outbound At Desktop Firewall']
     if drop:
-        IndicatorAction.drop_collection()
-    if len(IndicatorAction.objects()) < 1:
+        Action.drop_collection()
+    if len(Action.objects()) < 1:
         for action in actions:
-            ia = IndicatorAction()
+            ia = Action()
             ia.name = action
             ia.save()
-        print "Indicator Actions: added %s actions!" % len(actions)
+        print "Actions: added %s actions!" % len(actions)
     else:
-        print "Indicator Actions: existing documents detected. skipping!"
+        print "Actions: existing documents detected. skipping!"
+
 
 def populate_raw_data_types(drop):
     """
@@ -133,6 +120,29 @@ def populate_raw_data_types(drop):
         print "Raw Data Types: added %s types!" % len(data_types)
     else:
         print "Raw Data Types: existing documents detected. skipping!"
+
+
+def populate_signature_types(drop):
+    """
+    Populate default set of signature types into the system.
+
+    :param drop: Drop the existing collection before trying to populate.
+    :type: boolean
+    """
+
+    # define your signature types here
+    data_types = ['Bro', 'Snort', 'Yara']
+    if drop:
+        SignatureType.drop_collection()
+    if len(SignatureType.objects()) < 1:
+        for data_type in data_types:
+            dt = SignatureType()
+            dt.name = data_type
+            dt.save()
+        print "Signature Types: added %s types!" % len(data_types)
+    else:
+        print "Signature Types: existing documents detected. skipping!"
+
 
 def populate_tlds(drop):
     """

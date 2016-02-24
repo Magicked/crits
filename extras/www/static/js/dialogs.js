@@ -501,6 +501,7 @@ function update_dialog(e) {
 
     // get the form's inputs
     var inputs = form.find('input,select,textarea');
+    var sel_val = null;
 
     // pre-populate form
     inputs.each(function(index) {
@@ -521,19 +522,38 @@ function update_dialog(e) {
     if (data_elem.length) { // some fields are set by default on page request and don't
                 // need to be set here set here
         var value = data_elem.text();
-            if (input.attr('type') == 'radio') {
-                // check the correct radio element
-                input.filter('[value="'+value+'"]').prop('checked', true);
+        if (field == 'action_type') {
+            sel_val = value;
+        }
+        if (input.attr('type') == 'radio') {
+            // check the correct radio element
+            input.filter('[value="'+value+'"]').prop('checked', true);
+        } else {
+            // handle empty analysis fields (default to current user)
+            if (field == 'analyst' && !value) {
+                input.val(username);                // defined in base.html
             } else {
-                // handle empty analysis fields (default to current user)
-                if (field == 'analyst' && !value) {
-                    input.val(username);                // defined in base.html
-                } else {
-                    input.val(value.trim());
-                }
+                input.val(value.trim());
             }
         }
+        }
      });
+    var sel = form.find('#id_action_type');
+    if (typeof sel !== "undefined") {
+        if (typeof subscription_type !== "undefined") {
+            $.ajax({
+                type:'GET',
+                data: {type: subscription_type},
+                url: get_actions_for_tlo,
+                success: function(data) {
+                    $.each(data.results, function(x,y) {
+                        sel.append($('<option></option>').val(y).html(y));
+                    });
+                    sel.find('option[value="' + sel_val + '"]').attr('selected', true);
+                }
+            });
+        }
+    }
 }
 
 function timenow() {
@@ -1017,8 +1037,6 @@ function new_indicator_dialog(e) {
     var dialog = $("#dialog-new-indicator").closest(".ui-dialog");
     var form = dialog.find("form");
 
-    add_more_object_types_button(form, 'no_file');
-
     // If there is selected text, default the value in the form
     check_selected('indicator', dialog);
 }
@@ -1079,13 +1097,35 @@ var stdDialogs = {
 
       "new-domain": {title: "Domain", open: new_domain_dialog},
       "new-indicator": {title: "Indicator", open: new_indicator_dialog},
-      "indicator_action_add": {title: "Indicator Action"},
+      "action_add": {title: "Action"},
+      "add-action": {title: "Action", href:"",
+		       new: {open: function(e) {
+                    $('#id_action_performed_date').val(timenow());
+                    var sel = $('#form-add-action').find('#id_action_type');
+                    if (typeof subscription_type !== "undefined") {
+                        $.ajax({
+                            type:'GET',
+                            data: {type: subscription_type},
+                            url: get_actions_for_tlo,
+                            success: function(data) {
+                                $.each(data.results, function(x,y) {
+                                    sel.append($('<option></option>').val(y).html(y));
+                                });
+                            }
+                        });
+                    }
+               }},
+		       update: { open: update_dialog} },
       "indicator-blob": {title: "New Indicator Blob"},
 
       "new-event": {title: "Event", open: new_event_dialog},
       "new-ip": {title: "IP Address", open: new_ip_dialog},
       "new-raw-data": {title: "Raw Data" },
       "raw_data_type_add": {title: "Raw Data Type"},
+
+      "new-signature": {title: "Signature" },
+      "signature_type_add": {title: "Signature Type"},
+      "signature_dependency_add": {title: "Signature Dependency"},
 
       "new-target": {title: "Target", open: new_target_dialog },
 
@@ -1120,7 +1160,6 @@ var stdDialogs = {
 
   var fileDialogs = {
       // File Upload Dialogs
-      "new-standards": {title: "STIX Document"},
       "new-email-outlook": {title: "Upload Outlook Email" },
       "new-email-eml": {title: "Email" },
       "new-pcap": {title: "PCAP", personas: {related: newPersona("Upload Related PCAP",
@@ -1143,8 +1182,8 @@ var stdDialogs = {
   $.each(fileDialogs, function(id,opt) {
       stdDialog(id, opt, {
           new: { open: file_upload_dialog, submit: defaultSubmit }}
-          )
-          });
+      )
+  });
 
   // New Sample dialog has some additional setup, so add that as an event callback
   $("#dialog-new-sample").on("dialogopen", new_sample_dialog);
@@ -1157,7 +1196,7 @@ var stdDialogs = {
   // to make that sort of global change before 3.0.
   var singleInputDialogs = "#dialog-actor-identifier-type,#dialog-ticket,"+
       "#dialog-source_create,#dialog-user_role," +
-      "#dialog-indicator_action_add,#dialog-raw_data_type_add";
+      "#dialog-action_add,#dialog-raw_data_type_add,#dialog-signature_type_add,#dialog-signature_dependency_add";
   $(singleInputDialogs).on("dialogopen", fix_form_submit(addEditSubmit));
 
 
@@ -1186,16 +1225,6 @@ var stdDialogs = {
 
 
   $("#dialog-new-indicator").on("dialogcreate", new_indicator_dialog);
-
-  $(document).on('change', "#id_rst_fmt", function(e) {
-      if (this.value == 'stix') {
-          console.log("disable");
-          $("#id_bin_fmt").val("base64").prop("disabled", true);
-      } else {
-          console.log("enable");
-          $("#id_bin_fmt").prop("disabled", false);
-      }
-  });
 
   // Releasability has plus instance and delete buttons that use same callback
   $(document).on('click', '.add_releasability_instance_button',
