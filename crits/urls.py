@@ -30,7 +30,6 @@ urlpatterns = patterns('',
     (r'^services/', include('crits.services.urls')),           # Services
     (r'^signatures/', include('crits.signatures.urls')),       # Signatures
     (r'^targets/', include('crits.targets.urls')),             # Targets
-    (r'^vis/', include('crits.vis.urls')),                     # Vis.js
 )
 
 # Error overrides
