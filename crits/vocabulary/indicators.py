@@ -103,6 +103,7 @@ class IndicatorTypes(vocab):
     STRING_SWF = "String - SWF"
     STRING_JAVA = "String - Java"
     STRING_TEXT = "String - Text"
+    STRING_EPS = "String - EPS"
     TELEPHONE = "Telephone"
     TIME_CREATED = "Time Created"
     TIME_UPDATED = "Time Updated"
