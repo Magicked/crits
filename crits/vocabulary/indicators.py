@@ -102,7 +102,6 @@ class IndicatorTypes(vocab):
     STRING_OFFICE = "String - Office"
     STRING_SWF = "String - SWF"
     STRING_JAVA = "String - Java"
-    STRING_TEXT = "String - Text"
     STRING_EPS = "String - EPS"
     STRING_WIN_SHELL = "String - Windows Shell"
     STRING_UNIX_SHELL = "String - Unix Shell"
