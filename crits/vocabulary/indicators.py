@@ -26,6 +26,7 @@ class IndicatorTypes(vocab):
     DOMAIN = "URI - Domain Name"
     EMAIL_BOUNDARY = "Email Boundary"
     EMAIL_ADDRESS = "Email - Address"
+    EMAIL_CONTENT = "Email - Content"
     EMAIL_FROM = "Email Address From"
     EMAIL_HELO = "Email HELO"
     EMAIL_MESSAGE_ID = "Email Message ID"
