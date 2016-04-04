@@ -106,6 +106,7 @@ class IndicatorTypes(vocab):
     STRING_EPS = "String - EPS"
     STRING_WIN_SHELL = "String - Windows Shell"
     STRING_UNIX_SHELL = "String - Unix Shell"
+    STRING_AUTOIT = "String - AutoIt"
     TELEPHONE = "Telephone"
     TIME_CREATED = "Time Created"
     TIME_UPDATED = "Time Updated"
