@@ -12,7 +12,7 @@ except ImportError:
     from mongoengine.errors import ValidationError
 
 from crits.core import form_consts
-from crits.campaigns.campaign import Campaign
+from crits.core.class_mapper import class_from_id
 from crits.campaigns.forms import CampaignForm
 from crits.core.crits_mongoengine import create_embedded_source, json_handler
 from crits.core.crits_mongoengine import EmbeddedCampaign
@@ -27,6 +27,9 @@ from crits.events.event import Event
 from crits.notifications.handlers import remove_user_from_notification
 from crits.samples.handlers import handle_uploaded_file, mail_sample
 from crits.services.handlers import run_triage, get_supported_services
+
+from crits.vocabulary.relationships import RelationshipTypes
+
 
 
 def generate_event_csv(request):
@@ -232,8 +235,8 @@ def generate_event_id(event):
     return uuid.uuid4()
 
 def add_new_event(title, description, event_type, source, method, reference,
-                  date, analyst, bucket_list=None, ticket=None,
-                  campaign=None, campaign_confidence=None):
+                  date, analyst, bucket_list=None, ticket=None, related_id=None, 
+                  related_type=None, relationship_type=None):
     """
     Add a new Event to CRITs.
 
@@ -257,6 +260,12 @@ def add_new_event(title, description, event_type, source, method, reference,
     :type: str
     :param ticket: Ticket to associate with this event.
     :type ticket: str
+    :param related_id: ID of object to create relationship with
+    :type related_id: str
+    :param related_type: Type of object to create relationship with
+    :type related_type: str
+    :param relationship_type: Type of relationship to create.
+    :type relationship_type: str
     :returns: dict with keys "success" (boolean) and "message" (str)
     :param campaign: Campaign to attribute to this event.
     :type campaign: str
@@ -308,24 +317,41 @@ def add_new_event(title, description, event_type, source, method, reference,
     if ticket:
         event.add_ticket(ticket, analyst)
 
-    if not result:
-        try:
+    related_obj = None
+    if related_id:
+        related_obj = class_from_id(related_type, related_id)
+        if not related_obj:
+            retVal['success'] = False
+            retVal['message'] = 'Related Object not found.'
+            return retVal
+
+    try:
+        event.save(username=analyst)
+
+        if related_obj and event and relationship_type:
+            relationship_type=RelationshipTypes.inverse(relationship=relationship_type)
+            event.add_relationship(related_obj,
+                                  relationship_type,
+                                  analyst=analyst,
+                                  get_rels=False)
             event.save(username=analyst)
 
-            # run event triage
-            event.reload()
-            run_triage(event, analyst)
+        # run event triage
+        event.reload()
+        run_triage(event, analyst)
 
-            message = ('<div>Success! Click here to view the new event: <a href='
-                       '"%s">%s</a></div>' % (reverse('crits.events.views.view_event',
-                                                      args=[event.id]),
-                                              title))
-            result = {'success': True,
-                      'message': message,
-                      'id': str(event.id)}
-        except ValidationError, e:
-            result = {'success': False,
-                      'message': e}
+        message = ('<div>Success! Click here to view the new event: <a href='
+                   '"%s">%s</a></div>' % (reverse('crits.events.views.view_event',
+                                                  args=[event.id]),
+                                          title))
+        result = {'success': True,
+                  'message': message,
+                  'id': str(event.id),
+                  'object': event}
+
+    except ValidationError, e:
+        result = {'success': False,
+                  'message': e}
     return result
 
 def event_remove(_id, username):

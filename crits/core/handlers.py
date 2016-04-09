@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib.auth.signals import user_logged_in
 from django.middleware.csrf import rotate_token
 from django.contrib.auth import authenticate
-# we implement django.contrib.auth.login as user_login in here to accomodate mongoengine 
+# we implement django.contrib.auth.login as user_login in here to accomodate mongoengine
 from django.core.urlresolvers import reverse, resolve, get_script_prefix
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -471,7 +471,7 @@ def add_releasability(type_, id_, name, user, **kwargs):
         return {'success': False,
                 'message': "Could not add releasability: %s" % e}
 
-def add_releasability_instance(type_, _id, name, analyst):
+def add_releasability_instance(type_, _id, name, analyst, note=None):
     """
     Add releasability instance to a top-level object.
 
@@ -483,6 +483,8 @@ def add_releasability_instance(type_, _id, name, analyst):
     :type name: str
     :param analyst: The user adding the releasability instance.
     :type analyst: str
+    :param note: Optional note about this instance.
+    :type note: str
     :returns: dict with keys "success" (boolean) and "message" (str)
     """
 
@@ -492,7 +494,7 @@ def add_releasability_instance(type_, _id, name, analyst):
                 'message': "Could not find object."}
     try:
         date = datetime.datetime.now()
-        ri = Releasability.ReleaseInstance(analyst=analyst, date=date)
+        ri = Releasability.ReleaseInstance(analyst=analyst, date=date, note=note)
         obj.add_releasability_instance(name=name, instance=ri)
         obj.save(username=analyst)
         obj.reload()
@@ -2125,11 +2127,14 @@ def get_query(col_obj,request):
             "object_value":"objects.value",
             "analysis_result":"results.result",
     }
+
     term = ""
     query = {}
     response = {}
     params_escaped = {}
     for k,v in request.GET.items():
+        params_escaped[k] = html_escape(v)
+    for k,v in request.POST.items():
         params_escaped[k] = html_escape(v)
     urlparams = "?%s" % urlencode(params_escaped)
     if "q" in request.GET:
@@ -2160,6 +2165,7 @@ def get_query(col_obj,request):
         query.update(qdict)
         term = request.GET['q']
     qparams = request.GET.copy()
+    qparams.update(request.POST.copy())
     qparams = check_query(qparams,request.user.username,col_obj)
     for key,value in qparams.items():
         if key in keymaps:
@@ -2741,7 +2747,7 @@ def generate_users_jtable(request, option):
                             content_type="application/json")
     jtopts = {
         'title': "Users",
-        'default_sort': 'username ASC',
+        'default_sort': 'last_login DESC',
         'listurl': reverse('crits.core.views.users_listing', args=('jtlist',)),
         'deleteurl': None,
         'searchurl': None,
@@ -3362,14 +3368,14 @@ def user_login(request, user):
 
     This is basically same as django.contrib.auth.login from Django 1.7
     Django 1.8+ uses user._meta.pk.value_to_string(user) instead of user.pk
-    once mongoengine is fixed, we'll be able to just import 
+    once mongoengine is fixed, we'll be able to just import
     django.contrib.auth.login as user_login
     """
 
     SESSION_KEY = '_auth_user_id'
     BACKEND_SESSION_KEY = '_auth_user_backend'
     HASH_SESSION_KEY = '_auth_user_hash'
-    REDIRECT_FIELD_NAME = 'next'
+    #REDIRECT_FIELD_NAME = 'next'
     session_auth_hash = ''
     if user is None:
         user = request.user
