@@ -49,7 +49,7 @@ if settings.ENABLE_API:
     from crits.domains.api import DomainResource
     from crits.emails.api import EmailResource
     from crits.events.api import EventResource
-    from crits.indicators.api import IndicatorResource, IndicatorActivityResource, IndicatorCSVResource
+    from crits.indicators.api import IndicatorResource, IndicatorActivityResource
     from crits.exploits.api import ExploitResource
     from crits.ips.api import IPResource
     from crits.pcaps.api import PCAPResource
@@ -72,7 +72,6 @@ if settings.ENABLE_API:
     v1_api.register(EventResource())
     v1_api.register(ExploitResource())
     v1_api.register(IndicatorResource())
-    v1_api.register(IndicatorCSVResource())
     v1_api.register(IndicatorActivityResource())
     v1_api.register(IPResource())
     v1_api.register(PCAPResource())

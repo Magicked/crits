@@ -5,7 +5,7 @@ from tastypie import authorization
 from tastypie.authentication import MultiAuthentication
 
 from crits.indicators.indicator import Indicator
-from crits.indicators.handlers import handle_indicator_ind, activity_add, handle_indicator_csv
+from crits.indicators.handlers import handle_indicator_ind, activity_add
 from crits.core.api import CRITsApiKeyAuthentication, CRITsSessionAuthentication
 from crits.core.api import CRITsSerializer, CRITsAPIResource
 
@@ -173,65 +173,4 @@ class IndicatorActivityResource(CRITsAPIResource):
             content['url'] = url
         if result['success']:
             content['return_code'] = 0
-        self.crits_response(content)
-
-class IndicatorCSVResource(CRITsAPIResource):
-    """
-    Class to handle everything related to the Indicator API.
-
-    Currently supports GET and POST.
-    """
-
-    class Meta:
-        object_class = Indicator
-        allowed_methods = ('post')
-        resource_name = "indicator_csv"
-        authentication = MultiAuthentication(CRITsApiKeyAuthentication(),
-                                             CRITsSessionAuthentication())
-        authorization = authorization.Authorization()
-        serializer = CRITsSerializer()
-
-    def get_object_list(self, request):
-        """
-        Use the CRITsAPIResource to get our objects but provide the class to get
-        the objects from.
-
-        :param request: The incoming request.
-        :type request: :class:`django.http.HttpRequest`
-        :returns: Resulting objects in the specified format (JSON by default).
-
-        """
-
-        return super(IndicatorCSVResource, self).get_object_list(request,
-                                                              Indicator)
-
-    def obj_create(self, bundle, **kwargs):
-        """
-        Handles creating Indicators through the API.
-
-        :param bundle: Bundle containing the information containing the Indicator CSV
-        :type bundle: Tastypie Bundle object.
-        :returns: HttpResponse.
-        """
-
-        analyst = bundle.request.user.username
-        csv_data = bundle.data.get('csv_data', None)
-        source = bundle.data.get('source', None)
-        reference = bundle.data.get('reference', None)
-        method = bundle.data.get('method', None)
-        add_domain = bundle.data.get('add_domain', False)
-        add_relationship = bundle.data.get('add_relationship', False)
-        # Type must be blob otherwise we need to send it a file handle
-        ctype = "blob"
-
-        result = handle_indicator_csv(csv_data, source, method, reference, ctype, analyst, add_domain, add_relationship)
-
-        content = {'return_code': 0,
-                   'type': 'Indicator'}
-        if result.get('message'):
-            content['message'] = result.get('message')
-        if result.get('objectids'):
-            content['objectids'] = result.get('objectids')
-        if not result['success']:
-            content['return_code'] = 1
         self.crits_response(content)
