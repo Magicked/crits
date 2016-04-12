@@ -100,8 +100,7 @@ class EmailResource(CRITsAPIResource):
                                 ticket=ticket)
         if type_ == 'raw':
             raw_email = bundle.data.get('filedata', None)
-            raw_email_data = raw_email.read()
-            result = handle_pasted_eml(raw_email_data,
+            result = handle_pasted_eml(raw_email,
                                        source,
                                        reference,
                                        analyst,

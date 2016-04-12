@@ -65,7 +65,7 @@ else:
     SERVICE_MODEL = 'process'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    LOGIN_URL = "/crits/login/"
+    LOGIN_URL = "/login/"
 
 DATABASES = {
     'default': {
@@ -390,7 +390,6 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'signatures/static'),
     os.path.join(SITE_ROOT, 'config/static'),
     os.path.join(SITE_ROOT, 'targets/static'),
-    os.path.join(SITE_ROOT, 'vis/static'),
 )
 
 INSTALLED_APPS = (
@@ -422,7 +421,6 @@ INSTALLED_APPS = (
     'crits.signatures',
     'crits.stats',
     'crits.targets',
-    'crits.vis',
     'tastypie',
     'tastypie_mongoengine',
 )
