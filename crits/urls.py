@@ -49,8 +49,8 @@ if settings.ENABLE_API:
     from crits.domains.api import DomainResource
     from crits.emails.api import EmailResource
     from crits.events.api import EventResource
-    from crits.indicators.api import IndicatorResource, IndicatorActivityResource
     from crits.exploits.api import ExploitResource
+    from crits.indicators.api import IndicatorResource, IndicatorActivityResource
     from crits.ips.api import IPResource
     from crits.pcaps.api import PCAPResource
     from crits.raw_data.api import RawDataResource
