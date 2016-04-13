@@ -6,7 +6,7 @@ class IPTypes(vocab):
     """
 
 
-    IPV4_ADDRESS = "IPv4 Address"
-    IPV4_SUBNET = "IPv4 Subnet"
+    IPV4_ADDRESS = "Address - ipv4-addr"
+    IPV4_SUBNET = "Address - ipv4-net"
     IPV6_ADDRESS = "IPv6 Address"
     IPV6_SUBNET = "IPv6 Subnet"
