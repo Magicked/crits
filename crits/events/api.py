@@ -76,7 +76,9 @@ class EventResource(CRITsAPIResource):
                                date,
                                analyst,
                                bucket_list,
-                               ticket)
+                               ticket,
+                               campaign,
+                               campaign_confidence)
 
         if result.get('message'):
             content['message'] = result.get('message')
@@ -87,7 +89,8 @@ class EventResource(CRITsAPIResource):
                                   'api_name': 'v1',
                                   'pk': result.get('id')})
             content['url'] = url
-
         if result['success']:
             content['return_code'] = 0
+        else:
+            content['return_code'] = 1
         self.crits_response(content)

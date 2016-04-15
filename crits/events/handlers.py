@@ -1,3 +1,4 @@
+import datetime
 import json
 import uuid
 
@@ -12,6 +13,7 @@ except ImportError:
 
 from crits.core import form_consts
 from crits.core.class_mapper import class_from_id
+from crits.campaigns.campaign import Campaign
 from crits.campaigns.forms import CampaignForm
 from crits.core.crits_mongoengine import create_embedded_source, json_handler
 from crits.core.crits_mongoengine import EmbeddedCampaign
@@ -234,7 +236,8 @@ def generate_event_id(event):
     return uuid.uuid4()
 
 def add_new_event(title, description, event_type, source, method, reference,
-                  date, analyst, bucket_list=None, ticket=None, related_id=None, 
+                  date, analyst, bucket_list=None, ticket=None,
+                  campaign=None, campaign_confidence=None, related_id=None,
                   related_type=None, relationship_type=None):
     """
     Add a new Event to CRITs.
@@ -259,6 +262,10 @@ def add_new_event(title, description, event_type, source, method, reference,
     :type: str
     :param ticket: Ticket to associate with this event.
     :type ticket: str
+    :param campaign: Campaign to associate with this Event
+    :type campaign: str
+    :param campaign_confidence: Confidence to associate with the Campaign
+    :type campaign_confidence: str
     :param related_id: ID of object to create relationship with
     :type related_id: str
     :param related_type: Type of object to create relationship with
@@ -268,6 +275,7 @@ def add_new_event(title, description, event_type, source, method, reference,
     :returns: dict with keys "success" (boolean) and "message" (str)
     """
 
+    result = dict()
     if not source:
         return {'success': False, 'message': "Missing source information."}
 
