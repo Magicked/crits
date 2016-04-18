@@ -36,7 +36,7 @@ class IndicatorTypes(vocab):
     EMAIL_REPLY_TO = "Email Reply-To"
     EMAIL_SENDER = "Email Address Sender"
     EMAIL_SUBJECT = "Email - Subject"
-    EMAIL_X_MAILER = "Email - X-Mailer"
+    EMAIL_X_MAILER = "Email - Xmailer"
     EMAIL_X_ORIGINATING_IP = "Email X-Originating IP"
     FILE_CREATED = "File Created"
     FILE_DELETED = "File Deleted"
