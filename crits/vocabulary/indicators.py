@@ -48,7 +48,7 @@ class IndicatorTypes(vocab):
     FILE_WRITTEN = "File Written"
     GET_PARAM = "GET Parameter"
     IDS_STREETNAME = "IDS - Streetname"
-    IMPHASH = "IMPHASH"
+    IMPHASH = "Hash - IMPHASH"
     MD5 = "Hash - MD5"
     SHA1 = "Hash - SHA1"
     SHA256 = "Hash - SHA256"
