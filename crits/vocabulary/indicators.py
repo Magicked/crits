@@ -6,6 +6,7 @@ class IndicatorTypes(vocab):
     """
 
 
+    ACCOUNT = "Account"
     ADJUST_TOKEN = "Adjust Token"
     API_KEY = "API Key"
     AS_NUMBER = "AS Number"
