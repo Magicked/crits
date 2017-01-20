@@ -67,6 +67,7 @@ class IndicatorTypes(vocab):
     LAUNCH_AGENT = "Launch Agent"
     LOCATION = "Location"
     LONGITUDE = "Longitude"
+    MAC_ADDRESS = "MAC Address"
     MALWARE_NAME = "Antivirus - Streetname"
     MEMORY_ALLOC = "Memory Alloc"
     MEMORY_PROTECT = "Memory Protect"
@@ -129,7 +130,7 @@ class IndicatorTypes(vocab):
     WHOIS_NAME = "WHOIS Name"
     WHOIS_ADDR1 = "WHOIS Address 1"
     WHOIS_ADDR2 = "WHOIS Address 2"
-    WHOIS_GENERAL = "Whois"
+    WHOIS_REGISTRANT_EMAIL_ADDRESS = "WHOIS Registrant Email Address"
     WHOIS_TELEPHONE = "WHOIS Telephone"
     XPI = "XPI"
 
