@@ -108,13 +108,13 @@ def action_add(type_, id_, tlo_action, user=None, **kwargs):
                        tlo_action['end_date'],
                        tlo_action['performed_date'],
                        tlo_action['reason'],
-                       tlo_action['date'])
+                       date = datetime.datetime.now())
         obj.save(username=user)
         return {'success': True, 'object': tlo_action}
     except (ValidationError, TypeError, KeyError), e:
         return {'success': False, 'message': e}
 
-def action_remove(type_, id_, date, user, **kwargs):
+def action_remove(type_, id_, date, action, user, **kwargs):
     """
     Remove an action from a TLO.
 
@@ -124,6 +124,8 @@ def action_remove(type_, id_, date, user, **kwargs):
     :type id_: str
     :param date: The date of the action to remove.
     :type date: datetime.datetime
+    :param action: The name of the action to remove.
+    :type action: str
     :param analyst: The user removing the action.
     :type analyst: str
     :returns: dict with keys "success" (boolean) and "message" (str) if failed.
@@ -143,7 +145,7 @@ def action_remove(type_, id_, date, user, **kwargs):
                 'message': 'Could not find TLO'}
     try:
         date = datetime_parser(date)
-        obj.delete_action(date)
+        obj.delete_action(date, action)
         obj.save(username=user)
         return {'success': True}
     except (ValidationError, TypeError), e:
@@ -1976,8 +1978,13 @@ def data_query(col_obj, user, limit=25, skip=0, sort=[], query={},
                                               order_by(*sort).skip(skip).\
                                               limit(limit).only(*projection)
             else:
-                docs = col_obj.objects(__raw__=query).order_by(*sort).\
+                if projection:
+                    docs = col_obj.objects(__raw__=query).order_by(*sort).\
                                     skip(skip).limit(limit).only(*projection)
+                else:
+                    # Hack to fix AuditLog
+                    docs = col_obj.objects(__raw__=query).order_by(*sort).\
+                                    skip(skip).limit(limit)
         # Else, all other objects that have sources associated with them
         # need to be filtered appropriately
         else:
@@ -1986,9 +1993,14 @@ def data_query(col_obj, user, limit=25, skip=0, sort=[], query={},
             if count:
                 results['result'] = "OK"
                 return results
-            docs = col_obj.objects(source__name__in=sourcefilt,__raw__=query).\
+            if projection:
+                docs = col_obj.objects(source__name__in=sourcefilt,__raw__=query).\
                                     order_by(*sort).skip(skip).limit(limit).\
                                     only(*projection)
+            else:
+                # Hack to fix Dashboard
+                docs = col_obj.objects(source__name__in=sourcefilt,__raw__=query).\
+                                    order_by(*sort).skip(skip).limit(limit)
         for doc in docs:
             if hasattr(doc, "sanitize_sources"):
                 doc.sanitize_sources(username="%s" % user, sources=sourcefilt)
@@ -3394,8 +3406,12 @@ def user_login(request, user):
             request.session.flush()
     else:
         request.session.cycle_key()
-    #request.session[SESSION_KEY] = user._meta.pk.value_to_string(user)
-    request.session[SESSION_KEY] = user.pk
+    try:
+        # try the new way
+        request.session[SESSION_KEY] = user._meta.pk.value_to_string(user)
+    except Exception:
+        #if it doesn't work, do what Django 1.7 does
+        request.session[SESSION_KEY] = user.pk
     request.session[BACKEND_SESSION_KEY] = user.backend
     request.session[HASH_SESSION_KEY] = session_auth_hash
     if hasattr(request, 'user'):
