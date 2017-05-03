@@ -116,6 +116,7 @@ class IndicatorTypes(vocab):
     STRING_UNIX_SHELL = "String - Unix Shell"
     STRING_AUTOIT = "String - AutoIt"
     STRING_MACHO = "String - Mach-O"
+    STRING_HTML = "String - HTML"
     TELEPHONE = "Telephone"
     TIME_CREATED = "Time Created"
     TIME_UPDATED = "Time Updated"
