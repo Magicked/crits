@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+
+{% block title %} Profile Point Detail {% endblock %}
+
+{% block content %}
+
+<script>
+    var profile_point_id = "{{ profile_point.id | escapejs }}";
+    var ta_search = "{% url 'crits.core.views.global_search_listing' %}";
+</script>
+
+<div id="tabnav" class="tabnav" style="font-size:90%">
+    <ul style="font-size: 125%">
+    <li><a href="#details_section" id="details_button"><span>Details</span></a></li>
+    <li><a href="#analysis_section" id="analysis_button"><span>Analysis ({{ service_results|length }})</span></a></li>
+    {% include 'services_tab_list_widget.html' %}
+    </ul>
+<div id="details_section">
+
+{% if profile_point %}
+    <div class='content_box'>
+        <span class="horizontal_menu">
+        <ul class="hmenu">
+            <li><a href="#" class="dialogClick" dialog="download-profile_point">Download Profile Point</a></li>
+            {% if admin %}
+            <li class="right"><a href="#" class="deleteClick" data-is-object="true" type="profile_point" action='{% url "crits.profile_points.views.remove_profile_point" profile_point.id %}'>Delete ProfilePoint</a></li>
+            {% endif %}
+        </ul>
+        </span>
+    </div>
+
+<div class="content_box content_details">
+    <h3 class="titleheader">
+    <span>Summary</span>
+    </h3>
+    <div class="content_body">
+    <table class="vertical" width="100%">
+    <thead>
+    </thead>
+    <tbody>
+        <tr>
+        <td class='key'>ID</td>
+        <td>
+            {{ profile_point.id }}
+        </td>
+        </tr>
+        <tr>
+        <td class='key'>
+            Value
+        </td>
+        <td>
+            <span style="white-space:pre-wrap">{{ profile_point.value }}</span>
+        </td>
+        </tr>
+        <tr>
+        <td class='key'>
+            Creation Date
+        </td>
+        <td>
+            {{ profile_point.created }}
+        </td>
+        </tr>
+        <tr>
+        <td class='key'>
+            Last Modified
+        </td>
+        <td>
+            {{ profile_point.modified }}
+        </td>
+        </tr>
+        <tr>
+        <td class="key">Status
+            <span style="float: right;" class="object_status_response"></span>
+        </td>
+        <td>
+            <span class="edit" id="object_status" action="{% url 'crits.core.views.update_status' subscription.type subscription.id %}">{{profile_point.status}}</span>
+        </td>
+        <tr>
+        {% with releasability=profile_point.releasability %}
+            {% include 'releasability_list_widget.html' %}
+        {% endwith %}
+        </tr>
+    </tbody>
+    </table>
+    </div>
+</div>
+<div id="detail_floaters">
+    {% include 'details_options_widget.html' %}
+    {% with bucket_list=profile_point.bucket_list %}
+        {% include 'bucket_list_widget.html' %}
+    {% endwith %}
+    {% include 'add_related_widget.html' %}
+</div>
+<div>
+    {% with obj=profile_point obj_type=subscription.type %}
+        {% include 'tickets_listing_widget.html' %}
+    {% endwith %}
+</div>
+<div>
+    {% with hit=profile_point col=COL_INDICATORS obj=profile_point %}
+        {% include "campaigns_display_widget.html" %}
+    {% endwith %}
+</div>
+<div class="content_box">
+    <h3 class="titleheader">
+    <span>Activity</span>
+    <span class="add_button" data-intro="Add activity" data-position="right">
+      <a href="#" title="Add Activity" class="ui-icon ui-icon-plusthick dialogClick" dialog="add-activity" persona="new" action="{% url 'crits.profile_points.views.add_update_activity' 'add' profile_point.id %}"></a>
+    </span>
+    </h3>
+    <div class="content_body">
+    <table class="chart" id="activity_listing">
+    <thead>
+        {% if profile_point.activity %}
+        <tr>
+        {% else %}
+        <tr style="display:none">
+        {% endif %}
+        <th>Description</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Date Added</th>
+        <th>Analyst</th>
+        <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% with profile_point_id=profile_point.id %}
+        {% for activity in profile_point.activity %}
+            {% include "profile_points_activity_row_widget.html" %}
+        {% endfor %}
+        {% endwith %}
+    </tbody>
+    </table>
+    </div>
+</div>
+<div>
+{% include 'relationships_listing_widget.html' %}
+</div>
+<div>
+{% include 'objects_listing_widget.html' %}
+</div>
+<div>
+{% include 'screenshot_widget.html' %}
+</div>
+<div>
+{% include "comments_listing_widget.html" %}
+</div>
+</div>
+
+{% with item=profile_point %}
+    {% include "services_analysis_section.html" with crits_type="ProfilePoint" identifier=profile_point.id %}
+{% endwith %}
+
+{% include 'services_tab_tabs_widget.html' %}
+</div>
+
+<div style="display: none;">
+
+<div id="dialog-download-profile_point" title="Download ProfilePoint">
+    <form id="form-download-profile_point" action='{% url "crits.core.views.download_object" %}' method="POST" enctype="multipart/form-data">{% csrf_token %}
+    <table class="form">{{forms.download_form.as_table}}</table>
+    </form>
+</div>
+
+<div id="dialog-add-activity" title="Add Activity">
+    <form id="form-add-activity" method='POST' enctype="multipart/form-data" item-type="activity">
+    <table class="form"> {{ forms.new_activity.as_table }} </table>
+    </form>
+</div>
+
+</div>
+
+{% else %}
+<h1>Missing profile_point.</h1>
+
+{% endif %}
+{% endblock %}
+
+{% block javascript_includes %}
+<script type="text/javascript">
+    $(document).bind('enable_threat_types', function(){
+        threat_type_load = false;
+    });
+    $(document).bind('enable_attack_types', function(){
+        attack_type_load = false;
+    });
+</script>
+ <script type="text/javascript" src="{{ STATIC_URL }}js/profile_points.js"></script>
+
+ {% comment %}
+ Moved relationship setup here, so we can get dialogs to init
+ {% endcomment %}
+
+
+{% endblock %}
+

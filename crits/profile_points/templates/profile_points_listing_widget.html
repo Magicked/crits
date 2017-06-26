@@ -1,0 +1,44 @@
+
+{% if profile_point_list %}
+
+        <table class='chart tablesorter'>
+        <thead>
+        <tr>
+        <th>Value</th>
+        <th>Date Added</th>
+        <th>Campaign</th>
+        <th>Source</th>
+        <th>Status</th>
+        <th>ID</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for profile_point in profile_point_list %}
+        <tr>
+            <td>
+                {% if profile_point.value %}
+                    <a href="{% url 'crits.profile_points.views.profile_point' profile_point.id %}">{{ profile_point.value }}</a>
+                {% endif %}
+            </td>
+            <td>{{ profile_point.created|date:"DATE_FORMAT" }}</td>
+            <td>
+                {% for camp in profile_point.campaign %}
+                    <a href="{% url 'crits.profile_points.views.profile_points_listing' %}?campaign={{camp.name}}">{{camp.name}}</a><br/>
+                {% endfor %}
+            </td>
+            <td>
+                {% for source in profile_point.source %}
+                    <a href="{% url 'crits.profile_points.views.profile_points_listing' %}?source={{source.name}}">{{source.name}}</a><br/>
+                {% endfor %}
+            </td>
+            <td>
+                {{ profile_point.status }}
+            </td>
+            <td>
+                {{ profile_point.id }}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+{% endif %}
