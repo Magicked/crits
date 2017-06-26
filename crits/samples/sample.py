@@ -21,7 +21,7 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
     meta = {
         "collection": settings.COL_SAMPLES,
         "crits_type": 'Sample',
-        "latest_schema_version": 4,
+        "latest_schema_version": 5,
         "shard_key": ('md5',),
         "schema_doc": {
             'filename': 'The name of the last file that was uploaded with this'\
@@ -34,6 +34,7 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
             'sha1': 'The SHA1 of the file',
             'sha256': 'The SHA256 of the file',
             'ssdeep': 'The ssdeep of the file',
+            'impfuzzy': 'The impfuzzy of the executable file',
             'campaign': 'List [] of campaigns using this file',
             'source': 'List [] of sources that provided this file',
             'created': 'ISODate of when this file was uploaded',
@@ -63,7 +64,7 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
                          'linked_fields': ["filename", "source", "campaign",
                                            "filetype"],
                          'details_link': 'details',
-                         'no_sort': ['details', 'id']
+                         'no_sort': ['details']
                        },
     }
 
@@ -77,6 +78,7 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
     sha256 = StringField()
     size = IntField(default=0)
     ssdeep = StringField()
+    impfuzzy = StringField()
 
     def migrate(self):
         migrate_sample(self)
@@ -94,6 +96,10 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
         import pydeep
         import magic
         from hashlib import md5, sha1, sha256
+        try:
+            import pyimpfuzzy
+        except ImportError:
+            pass
         try:
             self.filetype = magic.from_buffer(data)
         except:
@@ -118,20 +124,40 @@ class Sample(CritsBaseAttributes, CritsSourceDocument, CritsActionsDocument,
             self.ssdeep = pydeep.hash_bytes(data)
         except:
             self.ssdeep = None
+        try:
+            self.impfuzzy = pyimpfuzzy.get_impfuzzy_data(data)
+        except:
+            self.impfuzzy = None
+
+    def is_office(self):
+        """
+        Is this a Office file.
+        """
+
+        ret = self.filedata.grid_id != None and self.filedata.read(8) == "\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
+        if self.filedata.grid_id:
+            self.filedata.seek(0)
+        return ret
 
     def is_pe(self):
         """
         Is this a PE file.
         """
 
-        return self.filedata.grid_id != None and self.filedata.read(2) == "MZ"
+        ret = self.filedata.grid_id != None and self.filedata.read(2) == "MZ"
+        if self.filedata.grid_id:
+            self.filedata.seek(0)
+        return ret
 
     def is_pdf(self):
         """
         Is this a PDF.
         """
 
-        return self.filedata.grid_id != None and "%PDF-" in self.filedata.read(1024)
+        ret = self.filedata.grid_id != None and "%PDF-" in self.filedata.read(1024)
+        if self.filedata.grid_id:
+            self.filedata.seek(0)
+        return ret
 
     def discover_binary(self):
         """

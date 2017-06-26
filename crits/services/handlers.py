@@ -127,7 +127,7 @@ def service_work_handler(service_instance, final_config):
 
 
 def run_service(name, type_, id_, user, obj=None,
-                execute='local', custom_config={}, **kwargs):
+                execute='local', custom_config={}, is_triage_run=False, **kwargs):
     """
     Run a service.
 
@@ -193,7 +193,7 @@ def run_service(name, type_, id_, user, obj=None,
     try:
         service_class.valid_for(local_obj.obj)
         if hasattr(local_obj.obj, 'filedata'):
-            if hasattr(local_obj.obj.filedata, 'seek'):
+            if local_obj.obj.filedata.grid_id:
                 # Reset back to the start so the service gets the full file.
                 local_obj.obj.filedata.seek(0)
     except ServiceConfigError as e:
@@ -228,7 +228,10 @@ def run_service(name, type_, id_, user, obj=None,
     logger.info("Running %s on %s, execute=%s" % (name, local_obj.obj.id, execute))
     service_instance = service_class(notify=update_analysis_results,
                                      complete=finish_task)
-
+    # Determine if this service is being run via triage
+    if is_triage_run:
+        service_instance.is_triage_run = True
+        
     # Give the service a chance to modify the config that gets saved to the DB.
     saved_config = dict(final_config)
     service_class.save_runtime_config(saved_config)
@@ -296,7 +299,9 @@ def run_triage(obj, user):
                         obj.id,
                         user,
                         obj=obj,
-                        execute=settings.SERVICE_MODEL)
+                        execute=settings.SERVICE_MODEL,
+                        custom_config={},
+                        is_triage_run=True)
         except:
             pass
     return
@@ -465,8 +470,10 @@ def finish_task(object_type, object_id, analysis_id, status, analyst):
 
     # Validate user can add service results to this TLO.
     klass = class_from_type(object_type)
-    sources = user_sources(analyst)
-    obj = klass.objects(id=object_id, source__name__in=sources).first()
+    params = {'id': object_id}
+    if hasattr(klass, 'source'):
+        params['source__name__in'] = user_sources(analyst)
+    obj = klass.objects(**params).first()
     if not obj:
         results['message'] = "Could not find object to add results to."
         return results
@@ -658,7 +665,7 @@ def get_supported_services(crits_type):
     """
 
     services = CRITsService.objects(enabled=True)
-    for s in services:
+    for s in sorted(services, key=lambda s: s.name.lower()):
         if s.supported_types == 'all' or crits_type in s.supported_types:
             yield s.name
 
@@ -721,7 +728,20 @@ def update_analysis_results(task):
         new_dict = {}
         for k in tdict.iterkeys():
             new_dict['set__%s' % k] = tdict[k]
-        AnalysisResult.objects(id=ar.id).update_one(**new_dict)
+        try:
+            AnalysisResult.objects(id=ar.id).update_one(**new_dict)
+        except Exception as e: # assume bad data in 'results'
+            task.status = 'error'
+            new_dict['set__results'] = []
+            le = EmbeddedAnalysisResultLog()
+            le.message = 'DB Update Failed: %s' % e
+            le.level = 'error'
+            le.datetime = str(datetime.datetime.now())
+            new_dict['set__log'].append(le)
+            try:
+                AnalysisResult.objects(id=ar.id).update_one(**new_dict)
+            except: # don't know what's wrong, try writing basic log only
+                AnalysisResult.objects(id=ar.id).update_one(set__log=[le])
 
 # The service pools need to be defined down here because the functions
 # that are used by the services must already be defined.

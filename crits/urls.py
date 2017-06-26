@@ -40,6 +40,7 @@ handler403 = 'crits.core.errors.custom_403'
 handler400 = 'crits.core.errors.custom_400'
 
 # Enable the API if configured
+# django_tastypie_mongoengine is broken with more recent versions of mongoengine
 if settings.ENABLE_API:
     from tastypie.api import Api
     from crits.actors.api import ActorResource, ActorIdentifierResource
@@ -61,6 +62,7 @@ if settings.ENABLE_API:
     from crits.services.api import ServiceResource
     from crits.signatures.api import SignatureResource
     from crits.targets.api import TargetResource
+    from crits.vocabulary.api import VocabResource
 
     v1_api = Api(api_name='v1')
     v1_api.register(ActorResource())
@@ -84,6 +86,7 @@ if settings.ENABLE_API:
     v1_api.register(ServiceResource())
     v1_api.register(SignatureResource())
     v1_api.register(TargetResource())
+    v1_api.register(VocabResource())
 
     for service_directory in settings.SERVICE_DIRS:
         if os.path.isdir(service_directory):
@@ -107,3 +110,9 @@ if settings.DEVEL_INSTANCE:
         urlpatterns.append(
             url(r'^%s(?P<path>.*)$' % _media_url, serve, {'document_root': settings.MEDIA_ROOT}))
     del(_media_url, serve)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

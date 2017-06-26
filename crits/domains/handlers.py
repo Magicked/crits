@@ -225,6 +225,12 @@ def generate_domain_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Informational Domains'",
+            'text': "'Informational'",
+            'click': "function () {$('#domain_listing').jtable('load', {'refresh': 'yes', 'status': 'Informational'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated Domains'",
             'text': "'Deprecated'",
             'click': "function () {$('#domain_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",
@@ -718,6 +724,7 @@ def update_tlds(data=None):
     while line:
         line = line.rstrip()
         if line and not line.startswith('//'):
+            line = line.replace("*.", "")
             TLD.objects(tld=line).update_one(set__tld=line, upsert=True)
         line = data.readline()
 

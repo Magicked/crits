@@ -43,8 +43,6 @@ from mongoengine import StringField, DateTimeField, ListField
 from mongoengine import BooleanField, ObjectIdField, EmailField
 from mongoengine import EmbeddedDocumentField, IntField
 from mongoengine import DictField, DynamicEmbeddedDocument
-from mongoengine.django.utils import datetime_now
-#from mongoengine.django.auth import SiteProfileNotAvailable
 
 from django.conf import settings
 from django.contrib import auth
@@ -312,9 +310,9 @@ class CRITsUser(CritsDocument, CritsSchemaDocument, Document):
     is_superuser = BooleanField(default=False,
                                 verbose_name='superuser status',
                                 help_text="Designates that this user has all permissions without explicitly assigning them.")
-    last_login = DateTimeField(default=datetime_now,
+    last_login = DateTimeField(default=datetime.datetime.now,
                                verbose_name='last login')
-    date_joined = DateTimeField(default=datetime_now,
+    date_joined = DateTimeField(default=datetime.datetime.now,
                                 verbose_name='date joined')
 
     invalid_login_attempts = IntField(default=0)
@@ -665,7 +663,7 @@ class CRITsUser(CritsDocument, CritsSchemaDocument, Document):
         email address.
         """
 
-        now = datetime_now()
+        now = datetime.datetime.now()
 
         # Normalize the address by lowercasing the domain part of the email
         # address.
@@ -744,36 +742,7 @@ class CRITsUser(CritsDocument, CritsSchemaDocument, Document):
 
     def get_username(self):
         return self.username
-    '''
-    def get_profile(self):
-        """
-        Returns site-specific profile for this user. Raises
-        SiteProfileNotAvailable if this site does not allow profiles.
-        """
-        if not hasattr(self, '_profile_cache'):
-            from django.conf import settings
-            if not getattr(settings, 'AUTH_PROFILE_MODULE', False):
-                raise SiteProfileNotAvailable('You need to set AUTH_PROFILE_MO'
-                                              'DULE in your project settings')
-            try:
-                app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
-            except ValueError:
-                raise SiteProfileNotAvailable('app_label and model_name should'
-                        ' be separated by a dot in the AUTH_PROFILE_MODULE set'
-                        'ting')
 
-            try:
-                model = models.get_model(app_label, model_name)
-                if model is None:
-                    raise SiteProfileNotAvailable('Unable to load the profile '
-                        'model, check AUTH_PROFILE_MODULE in your project sett'
-                        'ings')
-                self._profile_cache = model._default_manager.using(self._state.db).get(user__id__exact=self.id)
-                self._profile_cache.user = self
-            except (ImportError, ImproperlyConfigured):
-                raise SiteProfileNotAvailable
-        return self._profile_cache
-    '''
     def get_preference(self, section, setting, default=None):
         """
         Get a user preference setting out of the deep dynamic dictionary
@@ -848,6 +817,28 @@ class CRITsUser(CritsDocument, CritsSchemaDocument, Document):
         cn = "cn="
         if config.ldap_usercn:
             cn = config.ldap_usercn
+        # two-step ldap binding
+        if len(config.ldap_bind_dn) > 0:
+            try:
+            	logger.info("binding with bind_dn: %s" % config.ldap_bind_dn)
+            	l.simple_bind_s(config.ldap_bind_dn, config.ldap_bind_password)
+            	filter = '(|(cn='+self.username+')(uid='+self.username+')(mail='+self.username+'))'
+            	# use the retrieved dn for the second bind
+            	un = l.search_s(config.ldap_userdn,ldap.SCOPE_SUBTREE,filter,['dn'])[0][0]
+            except Exception as err:
+            	#logger.error("Error binding to LDAP for: %s" % config.ldap_bind_dn)
+            	logger.error("Error in info_from_ldap: %s" % err)
+            l.unbind()
+            if len(ldap_server) == 2:
+                l = ldap.initialize('%s:%s' % (url.unparse(),
+                                               ldap_server[1]))
+            else:
+                l = ldap.initialize(url.unparse())
+            l.protocol_version = 3
+            l.set_option(ldap.OPT_REFERRALS, 0)
+            l.set_option(ldap.OPT_TIMEOUT, 10)
+        else:
+            un = self.username
         # setup auth for custom cn's
         if len(config.ldap_usercn) > 0:
             un = "%s%s,%s" % (config.ldap_usercn,
@@ -855,29 +846,27 @@ class CRITsUser(CritsDocument, CritsSchemaDocument, Document):
                               config.ldap_userdn)
         elif "@" in config.ldap_userdn:
             un = "%s%s" % (self.username, config.ldap_userdn)
-        else:
-            un = self.username
 	try:
             # Try auth bind first
             l.simple_bind_s(un, password)
-            logger.info("Bound to LDAP for: %s" % self.username)
-        except Exception, e:
-            logger.error("Error binding to LDAP for: %s" % self.username)
-            logger.error("ERR: %s" % e)
+            logger.info("Bound to LDAP for: %s" % un)
+        except Exception as e:
+            #logger.error("Error binding to LDAP for: %s" % self.username)
+            logger.error("info_from_ldap:ERR: %s" % e)
         try:
             uatr = None
             uatr = l.search_s(config.ldap_userdn,
                               ldap.SCOPE_SUBTREE,
-                              "(%s%s)" % (cn, self.username)
+                              '(|(cn='+self.username+')(uid='+self.username+'))'
                               )[0][1]
             resp['first_name'] = uatr['givenName'][0]
             resp['last_name'] = uatr['sn'][0]
             resp['email'] = uatr['mail'][0]
             resp['result'] = "OK"
             logger.info("Retrieved LDAP info for: %s" % self.username)
-        except Exception, e:
-            logger.error("Error retrieving LDAP info for: %s" % self.username)
-            logger.error("ERR: %s" % e)
+        except Exception as e:
+            #logger.error("Error retrieving LDAP info for: %s" % self.username)
+            logger.error("info_from_ldap ERR: %s" % e)
         l.unbind()
         return resp
 
@@ -889,6 +878,7 @@ class AuthenticationMiddleware(object):
     # This has been added to make theSessions work on Django 1.8+ and
     # mongoengine 0.8.8 see:
     # https://github.com/MongoEngine/mongoengine/issues/966
+    # For mongoengine 10.x you can comment out AuthenticationMiddleware from settings.py
 
     def _get_user_session_key(self, request):
         from bson.objectid import ObjectId
@@ -995,6 +985,28 @@ class CRITsAuthBackend(object):
                     l.protocol_version = 3
                     l.set_option(ldap.OPT_REFERRALS, 0)
                     l.set_option(ldap.OPT_TIMEOUT, 10)
+                    # two-step ldap binding
+                    if len(config.ldap_bind_dn) > 0:
+                    	try:
+                    		logger.info("binding with bind_dn: %s" % config.ldap_bind_dn)
+                    		l.simple_bind_s(config.ldap_bind_dn, config.ldap_bind_password)
+                    		filter = '(|(cn='+fusername+')(uid='+fusername+')(mail='+fusername+'))'
+                    		# use the retrieved dn for the second bind
+                        	un = l.search_s(config.ldap_userdn,ldap.SCOPE_SUBTREE,filter,['dn'])[0][0]
+                        except Exception as err:
+            			#logger.error("Error binding to LDAP for: %s" % config.ldap_bind_dn)
+            			logger.error("authenticate ERR: %s" % err)
+                        l.unbind()
+                        if len(ldap_server) == 2:
+                            l = ldap.initialize('%s:%s' % (url.unparse(),
+                                                           ldap_server[1]))
+                        else:
+                            l = ldap.initialize(url.unparse())
+                        l.protocol_version = 3
+                        l.set_option(ldap.OPT_REFERRALS, 0)
+                        l.set_option(ldap.OPT_TIMEOUT, 10)
+                    else:
+                        un = fusername
                     # setup auth for custom cn's
                     if len(config.ldap_usercn) > 0:
                         un = "%s%s,%s" % (config.ldap_usercn,
@@ -1002,8 +1014,6 @@ class CRITsAuthBackend(object):
                                           config.ldap_userdn)
                     elif "@" in config.ldap_userdn:
                         un = "%s%s" % (fusername, config.ldap_userdn)
-                    else:
-                        un = fusername
                     logger.info("Logging in user: %s" % un)
                     l.simple_bind_s(un, password)
                     user = self._successful_settings(user, e, totp_enabled)
@@ -1014,7 +1024,7 @@ class CRITsAuthBackend(object):
                 except ldap.INVALID_CREDENTIALS:
                     l.unbind()
                     logger.info("Invalid LDAP credentials for: %s" % un)
-                except Exception, err:
+                except Exception as err:
                     logger.info("LDAP Auth error: %s" % err)
             # If LDAP auth fails, attempt normal CRITs auth.
             # This will help with being able to use local admin accounts when

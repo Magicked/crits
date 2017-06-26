@@ -12,7 +12,11 @@ from django.template.loader import render_to_string
 from mongoengine import Document, EmbeddedDocument, DynamicEmbeddedDocument
 from mongoengine import StringField, ListField, EmbeddedDocumentField
 from mongoengine import IntField, DateTimeField, ObjectIdField
-from mongoengine.base import BaseDocument, ValidationError
+from mongoengine.base import BaseDocument
+try:
+    from mongoengine import ValidationError
+except ImportError:
+    from mongoengine.base import ValidationError
 
 # Determine if we should be caching queries or not.
 from mongoengine import QuerySet as QS
@@ -249,10 +253,10 @@ class CritsStatusDocument(BaseDocument):
         Set the status of a top-level object.
 
         :param status: The status to set:
-                       ('New', 'In Progress', 'Analyzed', Deprecated')
+                       ('New', 'In Progress', 'Analyzed', 'Informational', 'Deprecated')
         """
 
-        if status in ('New', 'In Progress', 'Analyzed', 'Deprecated'):
+        if status in ('New', 'In Progress', 'Analyzed', 'Informational', 'Deprecated'):
             self.status = status
             if status == 'Deprecated' and 'actions' in self:
                 for action in self.actions:
@@ -322,6 +326,7 @@ class CritsDocument(BaseDocument):
             #.delete() is normally defined on a Document, not BaseDocument, so
             #   we'll have to monkey patch to call our delete.
             self.delete = self._custom_delete
+        self._meta['strict'] = False
         super(CritsDocument, self).__init__(**values)
 
     def _custom_save(self, force_insert=False, validate=True, clean=False,
@@ -742,18 +747,20 @@ class CritsActionsDocument(BaseDocument):
             ea.date = date
         self.actions.append(ea)
 
-    def delete_action(self, date=None):
+    def delete_action(self, date=None, action=None):
         """
         Delete an action.
 
         :param date: The date of the action to delete.
         :type date: datetime.datetime
+        :param action: The action to delete.
+        :type action: str
         """
 
-        if not date:
+        if not date or not action:
             return
         for t in self.actions:
-            if t.date == date:
+            if t.date == date and t.action_type == action:
                 self.actions.remove(t)
                 break
 
@@ -783,7 +790,7 @@ class CritsActionsDocument(BaseDocument):
         if not date:
             return
         for t in self.actions:
-            if t.date == date:
+            if t.date == date and t.action_type == type_:
                 self.actions.remove(t)
                 ea = EmbeddedAction()
                 ea.action_type = type_
@@ -1932,7 +1939,8 @@ class CritsBaseAttributes(CritsDocument, CritsBaseDocument,
                         elif modification == "reason":
                             self.relationships[c].rel_reason = new_reason
                         elif modification == "delete":
-                            del self.relationships[c]
+                            self.relationships.remove(r)
+                            break
                 else:
                     if (r.object_id == rel_item.id
                         and r.relationship == rel_type
@@ -1946,7 +1954,8 @@ class CritsBaseAttributes(CritsDocument, CritsBaseDocument,
                         elif modification == "reason":
                             self.relationships[c].rel_reason = new_reason
                         elif modification == "delete":
-                            del self.relationships[c]
+                            self.relationships.remove(r)
+                            break
             for c, r in enumerate(rel_item.relationships):
                 if rel_date:
                     if (r.object_id == self.id
@@ -1962,7 +1971,8 @@ class CritsBaseAttributes(CritsDocument, CritsBaseDocument,
                         elif modification == "reason":
                             rel_item.relationships[c].rel_reason = new_reason
                         elif modification == "delete":
-                            del rel_item.relationships[c]
+                            rel_item.relationships.remove(r)
+                            break
                 else:
                     if (r.object_id == self.id
                         and r.relationship == rev_type
@@ -1976,7 +1986,8 @@ class CritsBaseAttributes(CritsDocument, CritsBaseDocument,
                         elif modification == "reason":
                             rel_item.relationships[c].rel_reason = new_reason
                         elif modification == "delete":
-                            del rel_item.relationships[c]
+                            rel_item.relationships.remove(r)
+                            break
             if not got_rel:
                 rel_item.save(username=analyst)
             if modification == "delete":

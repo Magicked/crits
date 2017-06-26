@@ -107,9 +107,10 @@ class ServiceManager(object):
             service_description = service_class.description
             supported_types = service_class.supported_types
             compatability_mode = service_class.compatability_mode
+            is_triage_run = service_class.is_triage_run
 
-            logger.debug("Found service subclass: %s version %s" %
-                            (service_name, service_version))
+            #logger.debug("Found service subclass: %s version %s" %
+            #                (service_name, service_version))
 
             try:
                 StrictVersion(service_version)
@@ -122,7 +123,7 @@ class ServiceManager(object):
                 continue
             else:
                 # Only register the service if it is valid.
-                logger.debug("Registering Service %s" % service_name)
+                #logger.debug("Registering Service %s" % service_name)
                 svc_obj = CRITsService.objects(name=service_class.name).first()
                 service = service_class()
                 if not svc_obj:
@@ -163,6 +164,7 @@ class ServiceManager(object):
                 svc_obj.version = service_version
                 svc_obj.supported_types = supported_types
                 svc_obj.compatability_mode = compatability_mode
+                svc_obj.is_triage_run = is_triage_run
                 svc_obj.save()
                 self._services[service_class.name] = service_class
         # For anything in the database that did not import properly, mark the
@@ -306,6 +308,9 @@ class Service(object):
 
     source = settings.COMPANY_NAME
 
+    # Set default for is_triage_run
+    is_triage_run = False
+    
     # Set to a list of 'Sample', 'PCAP', etc.
     supported_types = ['all']
 
@@ -438,7 +443,7 @@ class Service(object):
         self.config = config
         self.ensure_current_task()
         self._info("Starting Analysis")
-
+        t_start = datetime.now()
         # Do it!
         try:
             self.run(self.current_task.obj, config)
@@ -470,7 +475,7 @@ class Service(object):
                               self.current_task.task_id,
                               status,
                               self.current_task.username)
-                logger.debug("Finished analysis %s" % self.current_task.task_id)
+                logger.debug("Finished analysis %s, %s, runtime: %s" % (self.current_task.task_id, self.name, str(datetime.now() - t_start)))
             # Reset current_task so another task can be assigned.
             self.current_task = None
 
