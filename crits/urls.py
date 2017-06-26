@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^notifications/', include('crits.notifications.urls')), # Notifications
     url(r'^objects/', include('crits.objects.urls')),             # Objects
     url(r'^pcaps/', include('crits.pcaps.urls')),                 # PCAPs
+    url(r'^profile_points/', include('crits.profile_points.urls')), # Profile  Points
     url(r'^raw_data/', include('crits.raw_data.urls')),           # Raw Data
     url(r'^relationships/', include('crits.relationships.urls')), # Relationships
     url(r'^samples/', include('crits.samples.urls')),             # Samples
@@ -53,6 +54,7 @@ if settings.ENABLE_API:
     from crits.indicators.api import IndicatorResource, IndicatorActivityResource
     from crits.ips.api import IPResource
     from crits.pcaps.api import PCAPResource
+    from crits.profile_points.api import ProfilePointResource
     from crits.raw_data.api import RawDataResource
     from crits.samples.api import SampleResource
     from crits.screenshots.api import ScreenshotResource
@@ -75,6 +77,7 @@ if settings.ENABLE_API:
     v1_api.register(IndicatorActivityResource())
     v1_api.register(IPResource())
     v1_api.register(PCAPResource())
+    v1_api.register(ProfilePointResource())
     v1_api.register(RawDataResource())
     v1_api.register(SampleResource())
     v1_api.register(ScreenshotResource())

@@ -149,6 +149,7 @@ COL_NOTIFICATIONS = "notifications"                       # notifications collec
 COL_OBJECTS = "objects"                                   # objects that are files that have been added
 COL_OBJECT_TYPES = "object_types"                         # types of objects that can be added
 COL_PCAPS = "pcaps"                                       # main pcaps collection
+COL_PROFILE_POINTS = "profile_points"                     # profile points collection
 COL_RAW_DATA = "raw_data"                                 # main raw data collection
 COL_RAW_DATA_TYPES = "raw_data_types"                     # list of available raw data types
 COL_RELATIONSHIP_TYPES = "relationship_types"             # list of available relationship types
@@ -345,6 +346,7 @@ _TEMPLATE_DIRS = [
     os.path.join(SITE_ROOT, 'locations/templates'),
     os.path.join(SITE_ROOT, 'objects/templates'),
     os.path.join(SITE_ROOT, 'pcaps/templates'),
+    os.path.join(SITE_ROOT, 'profile_points/templates'),
     os.path.join(SITE_ROOT, 'raw_data/templates'),
     os.path.join(SITE_ROOT, 'relationships/templates'),
     os.path.join(SITE_ROOT, 'samples/templates'),
@@ -382,6 +384,7 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'locations/static'),
     os.path.join(SITE_ROOT, 'objects/static'),
     os.path.join(SITE_ROOT, 'pcaps/static'),
+    os.path.join(SITE_ROOT, 'profile_points/static'),
     os.path.join(SITE_ROOT, 'raw_data/static'),
     os.path.join(SITE_ROOT, 'relationships/static'),
     os.path.join(SITE_ROOT, 'samples/static'),
@@ -413,6 +416,7 @@ INSTALLED_APPS = (
     'crits.locations',
     'crits.objects',
     'crits.pcaps',
+    'crits.profile_points',
     'crits.raw_data',
     'crits.relationships',
     'crits.samples',
@@ -530,6 +534,7 @@ CRITS_TYPES = {
     'IP': COL_IPS,
     'Notification': COL_NOTIFICATIONS,
     'PCAP': COL_PCAPS,
+    'ProfilePoints': COL_PROFILE_POINTS,
     'RawData': COL_RAW_DATA,
     'Sample': COL_SAMPLES,
     'Screenshot': COL_SCREENSHOTS,
