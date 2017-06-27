@@ -83,6 +83,7 @@ from crits.notifications.handlers import remove_user_from_notification
 from crits.notifications.handlers import remove_user_notifications
 from crits.objects.forms import AddObjectForm
 from crits.pcaps.forms import UploadPcapForm
+from crits.profile_points.forms import UploadProfilePointForm
 from crits.raw_data.forms import UploadRawDataFileForm, UploadRawDataForm
 from crits.raw_data.forms import NewRawDataTypeForm
 from crits.raw_data.raw_data import RawDataType
@@ -1184,6 +1185,10 @@ def base_context(request):
         except Exception, e:
             logger.warning("Base Context UploadPcapForm Error: %s" % e)
         try:
+            base_context['upload_pp'] = UploadProfilePointForm(user)
+        except Exception, e:
+            logger.warning("Base Context UploadProfilePointForm Error: %s" % e)
+        try:
             base_context['upload_text'] = UploadIndicatorTextForm(user)
         except Exception, e:
             logger.warning("Base Context UploadIndicatorTextForm Error: %s" % e)
@@ -1607,6 +1612,7 @@ def collections(request):
     colls['COL_INDICATORS'] = settings.COL_INDICATORS
     colls['COL_IPS'] = settings.COL_IPS
     colls['COL_PCAPS'] = settings.COL_PCAPS
+    colls['COL_PROFILE_POINTS'] = settings.COL_PROFILE_POINTS
     colls['COL_RAW_DATA'] = settings.COL_RAW_DATA
     colls['COL_SAMPLES'] = settings.COL_SAMPLES
     colls['COL_SIGNATURES'] = settings.COL_SIGNATURES

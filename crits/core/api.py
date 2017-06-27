@@ -576,6 +576,7 @@ class CRITsAPIResource(MongoEngineResource):
         import crits.services.handlers as servh
         import crits.signatures.handlers as sigh
         import crits.indicators.handlers as indh
+        import crits.profile_points.handlers as pph
 
         actions = {
             'Common': {
@@ -619,6 +620,11 @@ class CRITsAPIResource(MongoEngineResource):
                           },
             'IP': {},
             'PCAP': {},
+            'ProfilePoint': {
+                'activity_add' : pph.activity_add,
+                'activity_update' : pph.activity_update,
+                'activity_remove' : pph.activity_remove,
+            }
             'RawData': {},
             'Sample': {},
             'Signature': {

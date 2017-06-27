@@ -14,6 +14,7 @@ __obj_type_to_key_descriptor__ = {
     'Indicator': 'id',
     'IP': 'ip',
     'PCAP': 'md5',
+    'ProfilePoint': 'id',
     'RawData': 'title',
     'Sample': 'md5',
     'Signature': 'title',
@@ -52,6 +53,7 @@ def class_from_id(type_, _id):
     from crits.indicators.indicator import Indicator
     from crits.ips.ip import IP
     from crits.pcaps.pcap import PCAP
+    from crits.profile_points.profile_point import ProfilePoint
     from crits.raw_data.raw_data import RawData, RawDataType
     from crits.samples.sample import Sample
     from crits.screenshots.screenshot import Screenshot
@@ -94,6 +96,8 @@ def class_from_id(type_, _id):
         return IP.objects(id=_id).first()
     elif type_ == 'PCAP':
         return PCAP.objects(id=_id).first()
+    elif type_ == 'ProfilePoint':
+        return ProfilePoint.objects(id=_id).first()
     elif type_ == 'RawData':
         return RawData.objects(id=_id).first()
     elif type_ == 'RawDataType':
@@ -149,6 +153,7 @@ def class_from_value(type_, value):
     from crits.indicators.indicator import Indicator
     from crits.ips.ip import IP
     from crits.pcaps.pcap import PCAP
+    from crits.profile_points.profile_point import ProfilePoint
     from crits.raw_data.raw_data import RawData
     from crits.samples.sample import Sample
     from crits.screenshots.screenshot import Screenshot
@@ -191,6 +196,8 @@ def class_from_value(type_, value):
         return IP.objects(ip=value).first()
     elif type_ == 'PCAP':
         return PCAP.objects(md5=value).first()
+    elif type_ == 'ProfilePoint':
+        return ProfilePoint.objects(id=value).first()
     elif type_ == 'RawData':
         return RawData.objects(md5=value).first()
     elif type_ == 'Sample':
@@ -238,6 +245,7 @@ def class_from_type(type_):
     from crits.indicators.indicator import Indicator
     from crits.ips.ip import IP
     from crits.pcaps.pcap import PCAP
+    from crits.profile_points.profile_point import ProfilePoint
     from crits.raw_data.raw_data import RawData, RawDataType
     from crits.samples.sample import Sample
     from crits.screenshots.screenshot import Screenshot
@@ -272,6 +280,8 @@ def class_from_type(type_):
         return IP
     elif type_ == 'PCAP':
         return PCAP
+    elif type_ == 'ProfilePoint':
+        return ProfilePoint
     elif type_ == 'RawData':
         return RawData
     elif type_ == 'RawDataType':

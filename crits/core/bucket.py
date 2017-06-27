@@ -33,6 +33,7 @@ class Bucket(CritsDocument, CritsSchemaDocument, Document):
             'IP': 'Integer',
             'Indicator': 'Integer',
             'PCAP': 'Integer',
+            'ProfilePoint': 'Integer',
             'RawData': 'Integer',
             'Sample': 'Integer',
             'Signature': 'Integer'
@@ -51,6 +52,7 @@ class Bucket(CritsDocument, CritsSchemaDocument, Document):
     Indicator = IntField(default=0)
     IP = IntField(default=0)
     PCAP = IntField(default=0)
+    ProfilePoint = IntField(default=0)
     RawData = IntField(default=0)
     Sample = IntField(default=0)
     Signature = IntField(default=0)

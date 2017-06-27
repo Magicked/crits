@@ -292,6 +292,21 @@
       </form>
     </li>
     <li>
+      <b>Profile Points</b>
+      <form method="get" id="profile_point_search" action="{% url 'crits.profile_points.views.profile_points_listing' %}">
+        <input class='textbox' type="text" size = "32" value="" name="q" id="s" />
+        <select name="search_type" class='selectbox'>
+          <option value="bucket_list">Bucket List</option>
+          <option value="campaign">Campaign</option>
+          <option value="object_value">Object Value</option>
+          <option value="source">Source</option>
+          <option value="ticket_number">RT Ticket Number</option>
+          <option value="value" selected="selected">Value</option>
+        </select>
+        <input class='inputbutton' type="submit" name="search" value="Search" />
+      </form>
+    </li>
+    <li>
       <b>Events</b>
       <form method="get" id="event_search" action="{% url 'crits.events.views.events_listing' %}">
         <input class='textbox' type="text" size = "32" value="" name="q" id="s" />
@@ -501,6 +516,18 @@
     <li class='nav_objects mmenu_item'>
       <a href="{% url 'crits.pcaps.views.pcaps_listing' %}">PCAPs</a>
       <a href id="new-pcap" class="ui-icon ui-icon-plusthick add dialogClick" dialog="new-pcap" persona="new" title="New PCAP"></a>
+    </li>
+    <li class='nav_objects mmenu_item'>
+      <a href="{% url 'crits.profile_points.views.profile_points_listing' %}">Profile Points</a>
+      <a href id="new-profile-point" class="ui-icon ui-icon-plusthick add dialogClick" dialog="new-profile-point"  persona="new" title="New Profile Point"></a>
+      <ul class='sub-mmenu'>
+        <li class='mmenu_item'>
+          <a href id="profile-point-blob" class="dialogClick" dialog="profile-point-blob" persona="new">New Profile Point Blob</a>
+        </li>
+    <li class='mmenu_item'>
+          <a href id="new-profile-point-csv" class="dialogClick" dialog="new-profile-point-csv" persona="new">New Profile Point CSV</a>
+        </li>
+      </ul>
     </li>
     <li class='nav_objects mmenu_item'>
       <a href="{% url 'crits.raw_data.views.raw_data_listing' %}">Raw Data</a>

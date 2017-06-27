@@ -39,6 +39,7 @@ class Common():
     IP = "IP"
     Object = "Object"
     PCAP = "PCAP"
+    ProfilePoint = "ProfilePoint"
     RawData = "RawData"
     Sample = "Sample"
     Signature = "Signature"
@@ -204,6 +205,16 @@ class Indicator():
     SOURCE_REFERENCE = Common.SOURCE_REFERENCE
 
 
+class ProfilePoint():
+    """
+    Constants for ProfilePoints.
+    """
+
+    SOURCE = Common.SOURCE
+    SOURCE_METHOD = Common.SOURCE_METHOD
+    SOURCE_REFERENCE = Common.SOURCE_REFERENCE
+
+
 class NotificationType():
     ALERT = 'alert'
     ERROR = 'error'
@@ -328,6 +339,7 @@ def get_source_field_for_class(otype):
         Common.IP: IP.SOURCE,
         Common.Object: Object.SOURCE,
         Common.PCAP: PCAP.SOURCE,
+        Common.ProfilePoint: ProfilePoint.SOURCE,
         Common.RawData: RawData.SOURCE,
         Common.Sample: Sample.SOURCE,
         Common.Signature: Signature.SOURCE,

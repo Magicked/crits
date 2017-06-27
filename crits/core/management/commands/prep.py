@@ -95,6 +95,13 @@ def prep_pcaps():
 
     pass
 
+def prep_profile_points():
+    """
+    Migrate profile points.
+    """
+
+    pass
+
 def prep_targets():
     """
     Migrate targets.

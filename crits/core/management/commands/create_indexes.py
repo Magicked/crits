@@ -53,6 +53,7 @@ def remove_indexes():
                  settings.COL_PCAPS,
                  '%s.files' % settings.COL_PCAPS,
                  '%s.chunks' % settings.COL_PCAPS,
+                 settings.COL_PROFILE_POINTS,
                  settings.COL_SAMPLES,
                  '%s.files' % settings.COL_SAMPLES,
                  '%s.chunks' % settings.COL_SAMPLES,
@@ -197,6 +198,18 @@ def create_indexes():
         pcaps_chunks.ensure_index([("files_id", pymongo.ASCENDING),
                                 ("n", pymongo.ASCENDING)],
                                unique=True)
+
+    profile_points = mongo_connector(settings.COL_PROFILE_POINTS)
+    profile_points.ensure_index("value", background=True)
+    profile_points.ensure_index("lower", background=True)
+    profile_points.ensure_index("objects.value", background=True)
+    profile_points.ensure_index("relationships.value", background=True)
+    profile_points.ensure_index("campaign.name", background=True)
+    profile_points.ensure_index("created", background=True)
+    profile_points.ensure_index("modified", background=True)
+    profile_points.ensure_index("status", background=True)
+    profile_points.ensure_index("source.name", background=True)
+    profile_points.ensure_index("bucket_list", background=True)
 
     raw_data = mongo_connector(settings.COL_RAW_DATA)
     raw_data.ensure_index("link_id", background=True)

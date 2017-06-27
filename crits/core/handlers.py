@@ -58,6 +58,7 @@ from crits.exploits.exploit import Exploit
 from crits.ips.ip import IP
 from crits.notifications.handlers import get_user_notifications, generate_audit_notification
 from crits.pcaps.pcap import PCAP
+from crits.profile_points.profile_point import ProfilePoint
 from crits.raw_data.raw_data import RawData
 from crits.emails.email import Email
 from crits.samples.sample import Sample
@@ -301,6 +302,7 @@ def get_favorites(analyst):
         'Indicator': 'id',
         'IP': 'ip',
         'PCAP': 'filename',
+        'ProfilePoint': 'id'
         'RawData': 'title',
         'Sample': 'filename',
         'Screenshot': 'id',
@@ -414,6 +416,7 @@ def get_data_for_item(item_type, item_id):
         'Indicator': ['value', 'ind_type', ],
         'IP': ['ip', 'type', ],
         'PCAP': ['filename', ],
+        'ProfilePoint': ['value', ],
         'RawData': ['title', ],
         'Sample': ['filename', ],
         'Signature': ['title', ],
@@ -970,6 +973,7 @@ def alter_bucket_list(obj, buckets, val):
                            Indicator=0,
                            IP=0,
                            PCAP=0,
+                           ProfilePoint=0,
                            RawData=0,
                            Sample=0,
                            Signature=0,
@@ -1016,6 +1020,7 @@ def generate_bucket_jtable(request, option):
                                               'Indicator',
                                               'IP',
                                               'PCAP',
+                                              'ProfilePoint',
                                               'RawData',
                                               'Sample',
                                               'Signature',
@@ -1024,8 +1029,9 @@ def generate_bucket_jtable(request, option):
                             content_type='application/json')
 
     fields = ['name', 'Actor', 'Backdoor', 'Campaign', 'Certificate', 'Domain',
-              'Email', 'Event', 'Exploit', 'Indicator', 'IP', 'PCAP', 'RawData',
-              'Sample', 'Signature', 'Target', 'Promote']
+              'Email', 'Event', 'Exploit', 'Indicator', 'IP', 'PCAP',
+              'ProfilePoint', 'RawData', 'Sample', 'Signature', 'Target',
+              'Promote']
     jtopts = {'title': 'Buckets',
               'fields': fields,
               'listurl': 'jtlist',
@@ -1754,6 +1760,11 @@ def gen_global_query(obj,user,term,search_type="global",force_full=False):
                     {'value': search_query},
                     {'objects.value': search_query}
                 ]
+        elif type_ == "ProfilePoint":
+            search_list = [
+                    {'value': search_query},
+                    {'objects.value': search_query}
+                ]
         elif type_ == "Domain":
             search_list = [
                     {'domain': search_query},
@@ -2355,6 +2366,7 @@ def jtable_ajax_list(col_obj,url,urlfieldparam,request,excludes=[],includes=[],q
                     "Indicator": 'crits.indicators.views.indicator',
                     "IP": 'crits.ips.views.ip_detail',
                     "PCAP": 'crits.pcaps.views.pcap_details',
+                    "ProfilePoint": 'crits.profile_points.views.profile_points_details',
                     "RawData": 'crits.raw_data.views.raw_data_details',
                     "Sample": 'crits.samples.views.detail',
                     "Signature": 'crits.signatures.views.detail',
@@ -3085,6 +3097,19 @@ def generate_user_profile(username, request):
             final_indicators.append(i)
         subscriptions['Indicator'] = final_indicators
 
+    if 'ProfilePoint' in subscriptions:
+        subscription_count += len(subscriptions['ProfilePoint'])
+        final_pps = []
+        ids = [ObjectId(i['_id']) for i in subscriptions['ProfilePoint']]
+        pps = ProfilePoint.objects(id__in=ids).only('value')
+        m = map(itemgetter('_id'), subscriptions['ProfilePoint'])
+        for pp in pps:
+            p = pp.to_dict()
+            p['id'] = pp.id
+            p['date'] = subscriptions['ProfilePoint'][m.index(pp.id)]['date']
+            final_pps.append(p)
+        subscriptions['ProfilePoint'] = final_pps
+
     if 'Event' in subscriptions:
         subscription_count += len(subscriptions['Event'])
         final_events = []
@@ -3613,6 +3638,7 @@ def generate_global_search(request):
                 ['Indicator', 'crits.indicators.views.indicator', 'id'],
                 ['IP', 'crits.ips.views.ip_detail', 'ip'],
                 ['PCAP', 'crits.pcaps.views.pcap_details', 'md5'],
+                ['ProfilePoint', 'crits.profile_points.views.profile_point', 'id'],
                 ['RawData', 'crits.raw_data.views.raw_data_details', 'id'],
                 ['Sample', 'crits.samples.views.detail', 'md5'],
                 ['Signature', 'crits.signatures.views.signature_detail', 'id'],
@@ -3639,6 +3665,7 @@ def generate_global_search(request):
                     [Indicator,"crits.indicators.views.indicators_listing"],
                     [IP, "crits.ips.views.ips_listing"],
                     [PCAP, "crits.pcaps.views.pcaps_listing"],
+                    [ProfilePoint,"crits.profile_points.views.profile_points_listing"],
                     [RawData, "crits.raw_data.views.raw_data_listing"],
                     [Sample, "crits.samples.views.samples_listing"],
                     [Screenshot, "crits.screenshots.views.screenshots_listing"],
@@ -3835,6 +3862,7 @@ def details_from_id(type_, id_):
                 'Indicator': 'crits.indicators.views.indicator',
                 'IP': 'crits.ips.views.ip_detail',
                 'PCAP': 'crits.pcaps.views.pcap_details',
+                'ProfilePoint': 'crits.profile_points.views.profile_point',
                 'RawData': 'crits.raw_data.views.raw_data_details',
                 'Sample': 'crits.samples.views.detail',
                 'Screenshot': 'crits.screenshots.views.render_screenshot',
@@ -4106,6 +4134,7 @@ def alter_sector_list(obj, sectors, val):
                            Indicator=0,
                            IP=0,
                            PCAP=0,
+                           ProfilePoint=0,
                            RawData=0,
                            Sample=0,
                            Signature=0,
@@ -4152,6 +4181,7 @@ def generate_sector_jtable(request, option):
                                               'Indicator',
                                               'IP',
                                               'PCAP',
+                                              'ProfilePoint',
                                               'RawData',
                                               'Sample',
                                               'Signature',
@@ -4160,8 +4190,8 @@ def generate_sector_jtable(request, option):
                             content_type='application/json')
 
     fields = ['name', 'Actor', 'Backdoor', 'Campaign', 'Certificate', 'Domain',
-              'Email', 'Event', 'Exploit', 'Indicator', 'IP', 'PCAP', 'RawData',
-              'Sample', 'Signature', 'Target']
+              'Email', 'Event', 'Exploit', 'Indicator', 'IP', 'PCAP',
+              'ProfilePoint', 'RawData', 'Sample', 'Signature', 'Target']
     jtopts = {'title': 'Sectors',
               'fields': fields,
               'listurl': 'jtlist',
