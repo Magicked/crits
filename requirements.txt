@@ -20,7 +20,7 @@ lxml
 mongoengine==0.10.6
 git+https://github.com/MongoEngine/django-mongoengine.git
 pip>=8.1.2
-pydeep==0.2
+git+https://github.com/kbandla/pydeep.git
 pymongo==3.2.2
 pyparsing
 python-dateutil

@@ -23,15 +23,9 @@ from crits.profile_points.handlers import (
     activity_add,
     activity_update,
     activity_remove,
-    ci_update,
-    create_profile_point_and_ip,
-    set_profile_point_type,
-    modify_threat_types,
-    modify_attack_types,
     get_profile_point_details,
     generate_profile_point_jtable,
     generate_profile_point_csv,
-    create_profile_point_from_tlo
 )
 
 
@@ -167,7 +161,7 @@ def upload_profile_point(request):
                 else:
                     failed_msg = '<div>%s</div>' % result['message']
 
-        if request.POST['svalue'] == "Upload ProfilePoint":
+        if request.POST['svalue'] == "Upload Profile Point":
             form = UploadProfilePointForm(username,
                                           request.POST)
             if form.is_valid():
@@ -180,7 +174,6 @@ def upload_profile_point(request):
                     reference=request.POST['reference'],
                     campaign=request.POST['campaign'],
                     campaign_confidence=request.POST['campaign_confidence'],
-                    impact=request.POST['impact'],
                     bucket_list=request.POST[form_consts.Common.BUCKET_LIST_VARIABLE_NAME],
                     ticket=request.POST[form_consts.Common.TICKET_VARIABLE_NAME])
                 if result['success']:

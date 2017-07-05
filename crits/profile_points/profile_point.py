@@ -46,7 +46,7 @@ class ProfilePoint(CritsBaseAttributes, CritsSourceDocument,
                        ' profile point')
         },
         "jtable_opts": {
-            'details_url': 'crits.profile_points.views.profile_point_detail',
+            'details_url': 'crits.profile_points.views.profile_point',
             'details_url_key': 'id',
             'default_sort': "modified DESC",
             'searchurl': 'crits.profile_points.views.profile_points_listing',

@@ -5,7 +5,8 @@ from tastypie import authorization
 from tastypie.authentication import MultiAuthentication
 
 from crits.profile_points.profile_point import ProfilePoint
-from crits.profile_points.handlers import add_new_profile_point, activity_add
+from crits.profile_points.handlers import handle_profile_point_ind
+from crits.profile_points.handlers import activity_add
 from crits.core.api import CRITsApiKeyAuthentication
 from crits.core.api import CRITsSessionAuthentication
 from crits.core.api import CRITsSerializer, CRITsAPIResource
@@ -58,30 +59,31 @@ class ProfilePointResource(CRITsAPIResource):
         reference = bundle.data.get('reference', None)
         method = bundle.data.get('method', None)
         campaign = bundle.data.get('campaign', None)
-        campaign_confidence = bundle.data.get('campaign_confidence', None)
+        cc = bundle.data.get('campaign_confidence', None)
         bucket_list = bundle.data.get('bucket_list', None)
         ticket = bundle.data.get('ticket', None)
 
-        result = add_new_profile_point(value,
-                                       status=status,
-                                       source=source,
-                                       source_method=method,
-                                       source_reference=reference,
-                                       campaign=campaign,
-                                       campaign_confidence=campaign_confidence,
-                                       user=user,
-                                       bucket_list=bucket_list,
-                                       ticket=ticket)
+        result = handle_profile_point_ind(value,
+                                          source,
+                                          user,
+                                          status=status,
+                                          method=method,
+                                          reference=reference,
+                                          campaign=campaign,
+                                          campaign_confidence=cc,
+                                          bucket_list=bucket_list,
+                                          ticket=ticket)
 
         content = {'return_code': 0,
-                   'type': 'ProfilePoint',
-                   'message': result.get('message', ''),
-                   'id': result.get('id', '')}
-        if result.get('id'):
+                   'type': 'ProfilePoint'}
+        if result.get('message'):
+            content['message'] = result.get('message')
+        if result.get('objectid'):
             url = reverse('api_dispatch_detail',
                           kwargs={'resource_name': 'profile_points',
                                   'api_name': 'v1',
-                                  'pk': result.get('id')})
+                                  'pk': result.get('objectid')})
+            content['id'] = result.get('objectid')
             content['url'] = url
         if not result['success']:
             content['return_code'] = 1

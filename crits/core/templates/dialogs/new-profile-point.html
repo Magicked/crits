@@ -1,0 +1,18 @@
+
+
+<div id="dialog-{{ request.GET.dialog }}" title="Add New Profile Point"
+     afterDialogClick="new_profile_point_dialog();">
+    <form id="form-{{ request.GET.dialog }}"
+	  action='{% url "crits.profile_points.views.upload_profile_point" %}'
+	  method='POST' enctype="multipart/form-data"
+	  item-type="profile-point" input_clear_filter="[type!='hidden']">
+    <table class="form">{{ upload_pp.as_table }}</table>
+    <input type="hidden" name="svalue" value="Upload Profile Point">
+    <div id="form-upload-profile-point-results" class="form_results"></div>
+    </form>
+</div>
+
+{%
+# XXX The clear function for the static version of this form used to clear all the
+# drop-downs too, not sure we care
+%}

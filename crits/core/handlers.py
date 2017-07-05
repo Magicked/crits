@@ -302,7 +302,7 @@ def get_favorites(analyst):
         'Indicator': 'id',
         'IP': 'ip',
         'PCAP': 'filename',
-        'ProfilePoint': 'id'
+        'ProfilePoint': 'id',
         'RawData': 'title',
         'Sample': 'filename',
         'Screenshot': 'id',
@@ -2366,7 +2366,7 @@ def jtable_ajax_list(col_obj,url,urlfieldparam,request,excludes=[],includes=[],q
                     "Indicator": 'crits.indicators.views.indicator',
                     "IP": 'crits.ips.views.ip_detail',
                     "PCAP": 'crits.pcaps.views.pcap_details',
-                    "ProfilePoint": 'crits.profile_points.views.profile_points_details',
+                    "ProfilePoint": 'crits.profile_points.views.profile_point',
                     "RawData": 'crits.raw_data.views.raw_data_details',
                     "Sample": 'crits.samples.views.detail',
                     "Signature": 'crits.signatures.views.detail',

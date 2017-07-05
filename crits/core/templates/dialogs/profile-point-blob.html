@@ -1,0 +1,16 @@
+
+
+<div id="dialog-{{ request.GET.dialog }}" title="Upload Profile Point Blob">
+    <p><b>Profile Point Blob upload accepts a CSV formatted input.<br/>
+	It must have the following column names to be processed properly:<br/>
+        Profile Point, Campaign, Campaign Confidence, Bucket List, Ticket, Action, Status</b><br/><br/>
+        Separate multiple Tickets, Actions, and/or Bucket List values with commas, and<br/>
+        surround with quotes (e.g. "value1,value2,value3").</p>
+    <form id="form-{{ request.GET.dialog }}"
+	  action='{% url "crits.profile_points.views.upload_profile_point" %}'
+	  method='POST' enctype="multipart/form-data"
+	  item-type="profile-point" input_clear_filter="[type!='hidden'][id!='id_data']">
+    <table class="form">{{ upload_text.as_table }}</table>
+    <input type="hidden" name="svalue" value="Upload Text">
+    </form>
+</div>

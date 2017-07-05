@@ -17,7 +17,6 @@ except ImportError:
 from crits.campaigns.forms import CampaignForm
 from crits.campaigns.campaign import Campaign
 from crits.core import form_consts
-from crits.core.class_mapper import class_from_id
 from crits.core.crits_mongoengine import EmbeddedSource, EmbeddedCampaign
 from crits.core.crits_mongoengine import json_handler
 from crits.core.forms import SourceForm, DownloadFileForm
@@ -101,43 +100,43 @@ def generate_profile_point_jtable(request, option):
     jtable = build_jtable(jtopts, request)
     jtable['toolbar'] = [
         {
-            'tooltip': "'All ProfilePoints'",
+            'tooltip': "'All Profile Points'",
             'text': "'All'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'New ProfilePoints'",
+            'tooltip': "'New Profile Points'",
             'text': "'New'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'New'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'In Progress ProfilePoints'",
+            'tooltip': "'In Progress Profile Points'",
             'text': "'In Progress'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'In Progress'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'Analyzed ProfilePoints'",
+            'tooltip': "'Analyzed Profile Points'",
             'text': "'Analyzed'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'Analyzed'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'Informational ProfilePoints'",
+            'tooltip': "'Informational Profile Points'",
             'text': "'Informational'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'Informational'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'Deprecated ProfilePoints'",
+            'tooltip': "'Deprecated Profile Points'",
             'text': "'Deprecated'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",
             'cssClass': "'jtable-toolbar-center'",
         },
         {
-            'tooltip': "'Add ProfilePoint'",
+            'tooltip': "'Add Profile Point'",
             'text': "'Add ProfilePoint'",
             'click': "function () {$('#new-profile_point').click()}",
         },
@@ -166,6 +165,7 @@ def get_profile_point_details(profile_point_id, analyst):
     :returns: template (str), arguments (dict)
     """
 
+    logger.debug("In get_profile_point_details.")
     template = None
     users_sources = user_sources(analyst)
     profile_point = ProfilePoint.objects(id=profile_point_id,
@@ -434,9 +434,12 @@ def handle_profile_point_ind(value, source, analyst, status=None, method='',
             pp[form_consts.Common.TICKET_VARIABLE_NAME] = ticket
 
         try:
+            logger.debug("Inserting profile point.")
+            logger.debug("PP data is: {}".format(repr(pp)))
             return handle_profile_point_insert(pp, source, reference, analyst,
                                                method, cache=cache)
         except Exception as e:
+            logger.error("Exception caught while inserting profile point.")
             return {'success': False, 'message': repr(e)}
 
     return result
@@ -471,8 +474,7 @@ def handle_profile_point_insert(pp, source, reference='', analyst='',
     if pp.get('status', None) is None or len(pp.get('status', '')) < 1:
         pp['status'] = Status.NEW
 
-    profile_point = ProfilePoint.objects(pp_type=pp['type'],
-                                  lower=pp['lower']).first()
+    profile_point = ProfilePoint.objects(lower=pp['lower']).first()
 
     if not profile_point:
         profile_point = ProfilePoint()

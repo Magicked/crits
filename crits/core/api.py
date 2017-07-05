@@ -624,7 +624,7 @@ class CRITsAPIResource(MongoEngineResource):
                 'activity_add' : pph.activity_add,
                 'activity_update' : pph.activity_update,
                 'activity_remove' : pph.activity_remove,
-            }
+            },
             'RawData': {},
             'Sample': {},
             'Signature': {
