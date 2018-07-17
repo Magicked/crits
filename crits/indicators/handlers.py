@@ -148,6 +148,12 @@ def generate_indicator_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Informational Indicators'",
+            'text': "'Informational'",
+            'click': "function () {$('#indicator_listing').jtable('load', {'refresh': 'yes', 'status': 'Informational'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated Indicators'",
             'text': "'Deprecated'",
             'click': "function () {$('#indicator_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",

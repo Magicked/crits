@@ -1465,7 +1465,7 @@ $(document).ready(function() {
     {
         type:'select',
         data: {"New":"New", "In Progress":"In Progress", "Analyzed":"Analyzed",
-"Deprecated":"Deprecated"},
+"Informational":"Informational", "Deprecated":"Deprecated"},
         style:'display:inline',
         submit:'OK'
     });

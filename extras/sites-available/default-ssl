@@ -1,5 +1,10 @@
 <IfModule mod_ssl.c>
 <VirtualHost _default_:443>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteRule     ^/crits/(.*)$   /$1     [R]
+    </IfModule>
+
     ServerAdmin webmaster@localhost
 
     LogLevel warn
