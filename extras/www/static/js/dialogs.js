@@ -386,6 +386,54 @@ function populate_id(id, type) {
               });
           }
     });
+    // Add a related Indicator (Using the related dialog persona)
+    $( "#dialog-new-profile-point" ).on("dialogopen.add_related_profile_point", function(e) {
+        if ($(this).dialog("persona") == "related") {
+        $(this).find("form #id_related_id").val(id);
+        $(this).find("form #id_related_type").val(type);
+        $(this).find("form").bind("addEditSubmitComplete",
+            function(e, response) {
+                    $.ajax({
+                      type: "POST",
+                      success: function() {
+                          $('#relationship_box_container').load(location.href + " #relationship_box_container");
+                      }
+                    })
+              });
+          }
+    });
+    // Add a related Indicator (Using the related dialog persona)
+    $( "#dialog-new-profile-point-csv" ).on("dialogopen.add_related_profile_point", function(e) {
+        if ($(this).dialog("persona") == "related") {
+        $(this).find("form #id_related_id").val(id);
+        $(this).find("form #id_related_type").val(type);
+        $(this).find("form").bind("fileUploadComplete",
+                    function(e, response) {
+                    $.ajax({
+                      type: "POST",
+                      success: function() {
+                          $('#relationship_box_container').load(location.href + " #relationship_box_container");
+                      }
+                    })
+              });
+        }
+    });
+    // Add a related Indicator (Using the related dialog persona)
+    $( "#dialog-profile-point-blob" ).on("dialogopen.add_related_profile_point", function(e) {
+        if ($(this).dialog("persona") == "related") {
+        $(this).find("form #id_related_id").val(id);
+        $(this).find("form #id_related_type").val(type);
+        $(this).find("form").bind("addEditSubmitComplete",
+            function(e, response) {
+                    $.ajax({
+                      type: "POST",
+                      success: function() {
+                          $('#relationship_box_container').load(location.href + " #relationship_box_container");
+                      }
+                    })
+              });
+          }
+    });
     // Add a related IP (Using the related dialog persona)
     $( "#dialog-new-ip" ).on("dialogopen.add_related_ip", function(e) {
         if ($(this).dialog("persona") == "related") {
@@ -1421,6 +1469,14 @@ function new_indicator_dialog(e) {
     check_selected('indicator', dialog);
 }
 
+function new_profile_point_dialog(e) {
+    var dialog = $("#dialog-new-profile-point").closest(".ui-dialog");
+    var form = dialog.find("form");
+
+    // If there is selected text, default the value in the form
+    check_selected('profile_point', dialog);
+}
+
 // We may want to do something like this generally, but for now just doing it for single text entry form
 function fix_form_submit(submitAction) {
     return function(e) {
@@ -1497,6 +1553,9 @@ var stdDialogs = {
 		       update: { open: update_dialog} },
       "indicator-blob": {title: "New Indicator Blob", personas: {related: newPersona("Add Related Indicator Blob", {open: new_indicator_dialog}, addEditSubmit ) }, open: new_indicator_dialog },
 
+      "new-profile-point": {title: "Profile Point",  personas: {related: newPersona("Add Related Profile Point", {open: new_profile_point_dialog}, addEditSubmit ) }, open: new_profile_point_dialog},
+      "profile-point-blob": {title: "New Profile Point Blob", personas: {related: newPersona("Add Related Profile Point Blob", {open: new_profile_point_dialog}, addEditSubmit ) }, open: new_profile_point_dialog },
+
       "new-event": {title: "Event", personas: {related: newPersona("Add Related Event", {open: new_event_dialog}, addEditSubmit ) }, open: new_event_dialog },
       "new-ip": {title: "IP Address", personas: {related: newPersona("Add Related IP", {open: new_ip_dialog}, addEditSubmit ) }, open: new_ip_dialog },
       "new-raw-data": {title: "Raw Data", personas: {related: newPersona("Add Related Raw Data", {}, addEditSubmit) } },
@@ -1550,6 +1609,7 @@ var stdDialogs = {
       "new-certificate": {title: "Certificate", personas: {related: newPersona("Upload Related Certificate", {open: new_sample_dialog}, defaultSubmit) }, open: new_sample_dialog },
       "new-raw-data-file": {title: "Raw Data File", personas: {related: newPersona("Upload Related Raw Data", {open: file_upload_dialog}, defaultSubmit) }, open: file_upload_dialog },
       "new-indicator-csv": {title: "New Indicator CSV", personas: {related: newPersona("Upload Related Indicators", {open: file_upload_dialog}, defaultSubmit) }, open: file_upload_dialog },
+      "new-profile-point-csv": {title: "New Profile Point CSV", personas: {related: newPersona("Upload Related Profile Points", {open: file_upload_dialog}, defaultSubmit) }, open: file_upload_dialog },
   };
 
   // Ok, now initialize all the dialogs, with the href they are lazy-loaded
@@ -1603,6 +1663,8 @@ var stdDialogs = {
 
 
   $("#dialog-new-indicator").on("dialogcreate", new_indicator_dialog);
+
+  $("#dialog-new-profile-point").on("dialogcreate", new_profile_point_dialog);
 
   // Releasability has plus instance and delete buttons that use same callback
   $(document).on('click', '.add_releasability_instance_button',

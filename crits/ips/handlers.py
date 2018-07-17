@@ -125,6 +125,12 @@ def generate_ip_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Whitelisted IPs'",
+            'text': "'Whitelisted'",
+            'click': "function () {$('#ip_listing').jtable('load', {'refresh': 'yes', 'status': 'Whitelisted'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated IPs'",
             'text': "'Deprecated'",
             'click': "function () {$('#ip_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",

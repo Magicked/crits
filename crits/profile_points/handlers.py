@@ -130,6 +130,12 @@ def generate_profile_point_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Whitelisted Profile Points'",
+            'text': "'Whitelisted'",
+            'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'Whitelisted'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated Profile Points'",
             'text': "'Deprecated'",
             'click': "function () {$('#profile_point_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",

@@ -9,4 +9,6 @@ class Status(vocab):
     NEW = "New"
     IN_PROGRESS = "In Progress"
     ANALYZED = "Analyzed"
+    INFORMATIONAL = "Informational"
+    WHITELIST = "Whitelisted"
     DEPRECATED = "Deprecated"

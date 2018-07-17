@@ -7,7 +7,7 @@ urlpatterns = [
         prefix='crits.profile_points.views'),
     url(r'^upload/$', 'upload_profile_point',
         prefix='crits.profile_points.views'),
-    url(r'^remove/(?P<profile_point_id>[\S ]+)$', 'remove_profile_point',
+    url(r'^remove/(?P<_id>[\S ]+)$', 'remove_profile_point',
         prefix='crits.profile_points.views'),
     url(r'^activity/remove/(?P<profile_point_id>\w+)/$', 'remove_activity',
         prefix='crits.profile_points.views'),

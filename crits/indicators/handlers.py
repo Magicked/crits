@@ -151,6 +151,12 @@ def generate_indicator_jtable(request, option):
             'cssClass': "'jtable-toolbar-center'",
         },
         {
+            'tooltip': "'Whitelisted Indicators'",
+            'text': "'Whitelisted'",
+            'click': "function () {$('#indicator_listing').jtable('load', {'refresh': 'yes', 'status': 'Whitelisted'});}",
+            'cssClass': "'jtable-toolbar-center'",
+        },
+        {
             'tooltip': "'Deprecated Indicators'",
             'text': "'Deprecated'",
             'click': "function () {$('#indicator_listing').jtable('load', {'refresh': 'yes', 'status': 'Deprecated'});}",
